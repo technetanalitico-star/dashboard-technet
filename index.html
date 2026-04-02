@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TechNet Vendas - Agente Claro</title>
+    <title>TechNet Vendas - Dashboard Limpo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -11,12 +11,32 @@
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
         :root { --claro-red: #EF3829; --claro-blue: #4184e1; }
+        
+        /* Estilo dos Cards de KPI */
         .kpi-card { background: white; border-radius: 16px; padding: 14px; border-left: 4px solid var(--claro-red); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .kpi-blue { background-color: var(--claro-blue) !important; border-left-color: #2a61c7; }
-        .filter-select { appearance: none; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; font-size: 0.85rem; font-weight: 600; width: 100%; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.8rem center; background-size: 1.2em; }
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; background: white; border-radius: 16px; border: 1px solid #e2e8f0; isolation: isolate; }
+        
+        /* Estilo dos Filtros */
+        .filter-select { 
+            appearance: none; 
+            background: white; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 12px; 
+            padding: 12px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            width: 100%; 
+            color: #475569;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); 
+            background-repeat: no-repeat; 
+            background-position: right 0.8rem center; 
+            background-size: 1.2em; 
+        }
+
+        /* Tabela Responsiva */
+        .table-responsive { overflow-x: auto; background: white; border-radius: 16px; border: 1px solid #e2e8f0; isolation: isolate; }
         table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 600px; }
-        th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
     </style>
 </head>
@@ -30,16 +50,19 @@
                 </h1>
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Agente Autorizado Claro</p>
             </div>
-            <label for="excelInput" class="text-[10px] bg-[#EF3829] text-white font-bold px-3 py-2 rounded-lg cursor-pointer active:scale-95 transition">IMPORTAR EXCEL</label>
+            <label for="excelInput" class="text-[10px] bg-[#EF3829] text-white font-bold px-3 py-2 rounded-lg cursor-pointer active:scale-95 transition">IMPORTAR</label>
             <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden">
         </div>
     </header>
 
     <main class="p-4 max-w-md mx-auto space-y-5">
         <div id="dashboardView" class="hidden space-y-5">
-            <div class="grid grid-cols-1 gap-3">
-                <select id="supFilter" class="filter-select shadow-sm"></select>
-                <select id="vendFilter" class="filter-select shadow-sm"></select>
+            
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+                <div class="grid grid-cols-1 gap-3">
+                    <select id="supFilter" class="filter-select shadow-sm"></select>
+                    <select id="vendFilter" class="filter-select shadow-sm"></select>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -63,7 +86,7 @@
             <div class="table-responsive shadow-sm">
                 <table>
                     <thead>
-                        <tr><th>Em</th><th>Contrato</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Produtos</th></tr>
+                        <tr><th>Data</th><th>Em</th><th>Contrato</th><th>Cliente</th><th>Vendedor</th><th>Valor</th></tr>
                     </thead>
                     <tbody id="salesTableBody"></tbody>
                 </table>
@@ -72,8 +95,8 @@
 
         <div id="setupView" class="py-20 text-center space-y-4">
             <i data-lucide="file-spreadsheet" class="w-12 h-12 text-slate-300 mx-auto"></i>
-            <h2 class="text-xl font-bold">Importe seu Excel (.xlsx)</h2>
-            <p class="text-sm text-slate-500">Selecione a planilha de vendas da TechNet.</p>
+            <h2 class="text-xl font-bold">Importe a Planilha</h2>
+            <p class="text-sm text-slate-500">Selecione o arquivo Excel para carregar os dados.</p>
         </div>
     </main>
 
@@ -93,7 +116,6 @@
                 const worksheet = workbook.Sheets[firstSheetName];
                 const json = XLSX.utils.sheet_to_json(worksheet);
 
-                // Normalização das colunas (remove espaços extras)
                 rawData = json.map(row => {
                     let nRow = {};
                     for (let k in row) nRow[k.trim()] = row[k];
@@ -102,18 +124,18 @@
 
                 document.getElementById('setupView').style.display = 'none';
                 document.getElementById('dashboardView').classList.remove('hidden');
-                init();
+                initFilters();
             };
             reader.readAsBinaryString(file);
         });
 
-        function init() {
+        function initFilters() {
             const sups = [...new Set(rawData.map(i => i.Supervisor))].filter(Boolean).sort();
             document.getElementById('supFilter').innerHTML = '<option value="all">Todos Supervisores</option>' + sups.map(s => `<option value="${s}">${s}</option>`).join('');
-            update();
+            updateSellers();
         }
 
-        function update() {
+        function updateSellers() {
             const sSup = document.getElementById('supFilter').value;
             const sellers = [...new Set(rawData.filter(i => sSup === 'all' || i.Supervisor === sSup).map(i => i.Vendedor))].filter(Boolean).sort();
             document.getElementById('vendFilter').innerHTML = '<option value="all">Todos Vendedores</option>' + sellers.map(v => `<option value="${v}">${v}</option>`).join('');
@@ -135,21 +157,20 @@
                 chip += parseInt(i.CHIP) || 0;
                 dcc += parseInt(i.DCC) || 0;
                 fone += parseInt(i.FONE) || 0;
-                // SheetJS já costuma tratar números corretamente, mas garantimos a conversão
                 const val = typeof i.Valor === 'number' ? i.Valor : parseFloat(String(i.Valor || 0).replace(',', '.'));
                 total += val;
 
                 if (idx < 100) {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td class="font-bold text-[#EF3829]">${i.Em || i.Empresa || ''}</td>
-                        <td class="text-slate-500">#${i.Contrato || ''}</td>
-                        <td class="font-bold text-slate-800">${i.Cliente || ''}</td>
-                        <td>${i.Vendedor || ''}</td>
-                        <td class="font-black text-slate-900">R$ ${val.toFixed(2)}</td>
-                        <td class="text-[#4184e1] font-medium">${i.Produtos || ''}</td>
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="text-slate-400">${i.Data || ''}</td>
+                            <td class="font-bold text-[#EF3829]">${i.Em || i.Empresa || ''}</td>
+                            <td>#${i.Contrato || ''}</td>
+                            <td class="font-bold">${i.Cliente || ''}</td>
+                            <td>${i.Vendedor || ''}</td>
+                            <td class="font-black">R$ ${val.toFixed(2)}</td>
+                        </tr>
                     `;
-                    tbody.appendChild(tr);
                 }
             });
 
@@ -161,7 +182,7 @@
             document.getElementById('valFaturamento').textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
         }
 
-        document.getElementById('supFilter').addEventListener('change', update);
+        document.getElementById('supFilter').addEventListener('change', updateSellers);
         document.getElementById('vendFilter').addEventListener('change', render);
     </script>
 </body>
