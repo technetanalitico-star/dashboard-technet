@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TechNet - Dashboard & Ranking</title>
+    <title>TechNet BI - Oficial</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -22,15 +22,13 @@
             background-repeat: no-repeat; background-position: right 0.8rem center; background-size: 1.2em; 
         }
 
-        /* Tabela Responsiva */
         .table-responsive { overflow-x: auto; background: white; border-radius: 16px; border: 1px solid #e2e8f0; isolation: isolate; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 900px; }
         th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
 
-        /* Estilo do Ranking */
         .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; }
-        .rank-number { width: 24px; font-weight: 800; font-size: 14px; }
+        label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; margin-left: 4px; }
     </style>
 </head>
 <body class="pb-10">
@@ -41,9 +39,9 @@
                 <h1 class="text-base font-extrabold tracking-tighter flex items-center gap-2">
                     <span class="w-2.5 h-2.5 bg-[#EF3829] rounded-full"></span> TECHNET VENDAS
                 </h1>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Performance & Gamificação</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Dash de Performance</p>
             </div>
-            <label for="excelInput" class="text-[10px] bg-[#EF3829] text-white font-bold px-3 py-2 rounded-lg cursor-pointer active:scale-95 transition">IMPORTAR</label>
+            <label for="excelInput" class="text-[10px] bg-[#EF3829] text-white font-bold px-3 py-2 rounded-lg cursor-pointer active:scale-95 transition m-0">IMPORTAR</label>
             <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden">
         </div>
     </header>
@@ -51,37 +49,25 @@
     <main class="p-4 max-w-md mx-auto space-y-5">
         <div id="dashboardView" class="hidden space-y-5">
             
-            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
-                <div class="flex justify-between items-end mb-3">
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Meta de Equipe (VNA)</p>
-                        <h2 id="txtMetaProgresso" class="text-2xl font-black text-slate-800">R$ 0,00</h2>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-extrabold text-slate-400">OBJETIVO</p>
-                        <p class="text-xs font-black text-[#EF3829]">R$ 12.000,00</p>
-                    </div>
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                <div>
+                    <label>Canal de Venda</label>
+                    <select id="canalFilter" class="filter-select shadow-sm">
+                        <option value="all">VNA + RDT (Todos)</option>
+                        <option value="VNA">VNA</option>
+                        <option value="RDT">RDT</option>
+                    </select>
                 </div>
-                <div class="w-full bg-slate-100 h-4 rounded-full overflow-hidden">
-                    <div id="barMeta" class="h-full bg-[#EF3829] transition-all duration-1000" style="width: 0%"></div>
-                </div>
-                <p id="txtPercentualMeta" class="text-[10px] font-bold text-center mt-2 text-slate-500 italic">0% da meta atingida</p>
-            </div>
-
-            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                 <div class="grid grid-cols-1 gap-3">
-                    <select id="supFilter" class="filter-select shadow-sm"></select>
-                    <select id="vendFilter" class="filter-select shadow-sm"></select>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-2">
-                    <i data-lucide="trophy" class="w-4 h-4 text-yellow-500"></i>
-                    <h3 class="text-xs font-extrabold uppercase tracking-tighter">Ranking de Faturamento</h3>
-                </div>
-                <div id="rankingContainer" class="p-2">
+                    <div>
+                        <label>Supervisor</label>
+                        <select id="supFilter" class="filter-select shadow-sm"></select>
                     </div>
+                    <div>
+                        <label>Vendedor</label>
+                        <select id="vendFilter" class="filter-select shadow-sm"></select>
+                    </div>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -97,7 +83,7 @@
                     <h2 id="valDCC" class="text-3xl font-black text-white">0</h2>
                 </div>
                 <div class="bg-[#0f172a] rounded-2xl p-5 border-l-8 border-[#EF3829] shadow-lg">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Receita do Filtro</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faturamento Filtrado</p>
                     <h2 id="valFaturamento" class="text-3xl font-black text-white tracking-tight mt-1">R$ 0,00</h2>
                 </div>
             </div>
@@ -105,24 +91,37 @@
             <div class="table-responsive shadow-sm">
                 <table>
                     <thead>
-                        <tr><th>Data</th><th>Em</th><th>Cliente</th><th>Vendedor</th><th>Valor</th></tr>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Cliente</th>
+                            <th>Vendedor</th>
+                            <th>Valor</th>
+                            <th>Produto</th>
+                        </tr>
                     </thead>
                     <tbody id="salesTableBody"></tbody>
                 </table>
             </div>
+
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-2">
+                    <i data-lucide="trophy" class="w-4 h-4 text-yellow-500"></i>
+                    <h3 class="text-xs font-extrabold uppercase tracking-tighter">Ranking de Faturamento</h3>
+                </div>
+                <div id="rankingContainer" class="p-2"></div>
+            </div>
         </div>
 
         <div id="setupView" class="py-20 text-center space-y-4">
-            <i data-lucide="layout-dashboard" class="w-12 h-12 text-slate-300 mx-auto"></i>
-            <h2 class="text-xl font-bold">Painel TechNet</h2>
-            <p class="text-sm text-slate-500">Importe os dados para ver o Ranking e Metas.</p>
+            <i data-lucide="upload" class="w-12 h-12 text-slate-300 mx-auto"></i>
+            <h2 class="text-xl font-bold">TechNet BI</h2>
+            <p class="text-sm text-slate-500">Importe sua planilha de vendas (Excel) para começar.</p>
         </div>
     </main>
 
     <script>
         lucide.createIcons();
         let rawData = [];
-        const META_EQUIPE = 12000;
 
         document.getElementById('excelInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -132,10 +131,10 @@
             reader.onload = function(evt) {
                 const data = evt.target.result;
                 const workbook = XLSX.read(data, { type: 'binary' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(worksheet);
 
+                // Normaliza chaves para evitar problemas com espaços ou acentos
                 rawData = json.map(row => {
                     let nRow = {};
                     for (let k in row) nRow[k.trim()] = row[k];
@@ -144,104 +143,109 @@
 
                 document.getElementById('setupView').style.display = 'none';
                 document.getElementById('dashboardView').classList.remove('hidden');
-                
                 initFilters();
-                calculateTeamMeta(); // Meta é calculada uma vez sobre todos os dados VNA
             };
             reader.readAsBinaryString(file);
         });
 
-        function calculateTeamMeta() {
-            // Filtra apenas VNA para a meta de equipe
-            const vnaData = rawData.filter(i => {
-                const empresa = String(i.Em || i.Empresa || '').toUpperCase();
-                return empresa.includes('VNA');
-            });
-
-            const totalVNA = vnaData.reduce((acc, i) => {
-                const val = typeof i.Valor === 'number' ? i.Valor : parseFloat(String(i.Valor || 0).replace(',', '.'));
-                return acc + val;
-            }, 0);
-
-            const percentual = Math.min((totalVNA / META_EQUIPE) * 100, 100);
-            
-            document.getElementById('txtMetaProgresso').textContent = `R$ ${totalVNA.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            const bar = document.getElementById('barMeta');
-            bar.style.width = percentual + '%';
-            
-            // Muda cor se bater a meta
-            if(percentual >= 100) {
-                bar.classList.remove('bg-[#EF3829]');
-                bar.classList.add('bg-green-500');
-                document.getElementById('txtPercentualMeta').textContent = "META ATINGIDA! 🚀";
-            } else {
-                document.getElementById('txtPercentualMeta').textContent = `${percentual.toFixed(1)}% da meta atingida`;
-            }
+        function initFilters() {
+            updateSups();
         }
 
-        function initFilters() {
-            const sups = [...new Set(rawData.map(i => i.Supervisor))].filter(Boolean).sort();
-            document.getElementById('supFilter').innerHTML = '<option value="all">Todos Supervisores</option>' + sups.map(s => `<option value="${s}">${s}</option>`).join('');
+        function updateSups() {
+            const sCanal = document.getElementById('canalFilter').value;
+            const filteredByCanal = rawData.filter(i => {
+                if (sCanal === 'all') return true;
+                return String(i.Em || i.Empresa || '').toUpperCase().includes(sCanal);
+            });
+            const sups = [...new Set(filteredByCanal.map(i => i.Supervisor))].filter(Boolean).sort();
+            document.getElementById('supFilter').innerHTML = '<option value="all">Todos Supervisores</option>' + 
+                sups.map(s => `<option value="${s}">${s}</option>`).join('');
             updateSellers();
         }
 
         function updateSellers() {
+            const sCanal = document.getElementById('canalFilter').value;
             const sSup = document.getElementById('supFilter').value;
-            const sellers = [...new Set(rawData.filter(i => sSup === 'all' || i.Supervisor === sSup).map(i => i.Vendedor))].filter(Boolean).sort();
-            document.getElementById('vendFilter').innerHTML = '<option value="all">Todos Vendedores</option>' + sellers.map(v => `<option value="${v}">${v}</option>`).join('');
+            const filtered = rawData.filter(i => {
+                const canalMatch = sCanal === 'all' || String(i.Em || i.Empresa || '').toUpperCase().includes(sCanal);
+                const supMatch = sSup === 'all' || i.Supervisor === sSup;
+                return canalMatch && supMatch;
+            });
+            const sellers = [...new Set(filtered.map(i => i.Vendedor))].filter(Boolean).sort();
+            document.getElementById('vendFilter').innerHTML = '<option value="all">Todos Vendedores</option>' + 
+                sellers.map(v => `<option value="${v}">${v}</option>`).join('');
             render();
         }
 
         function render() {
+            const sCanal = document.getElementById('canalFilter').value;
             const sSup = document.getElementById('supFilter').value;
             const sVend = document.getElementById('vendFilter').value;
-            const filtered = rawData.filter(i => (sSup === 'all' || i.Supervisor === sSup) && (sVend === 'all' || i.Vendedor === sVend));
+
+            const filtered = rawData.filter(i => {
+                const canalMatch = sCanal === 'all' || String(i.Em || i.Empresa || '').toUpperCase().includes(sCanal);
+                const supMatch = sSup === 'all' || i.Supervisor === sSup;
+                const vendMatch = sVend === 'all' || i.Vendedor === sVend;
+                return canalMatch && supMatch && vendMatch;
+            });
 
             let virtua = 0, tv = 0, chip = 0, dcc = 0, fone = 0, total = 0;
             const tbody = document.getElementById('salesTableBody');
             tbody.innerHTML = '';
-
-            // Lógica para o Ranking (Agrupado por Vendedor)
             const salesBySeller = {};
 
             filtered.forEach((i, idx) => {
-                virtua += parseInt(i.VIRTUA) || 0;
-                tv += parseInt(i.TV) || 0;
-                chip += parseInt(i.CHIP) || 0;
-                dcc += parseInt(i.DCC) || 0;
-                fone += parseInt(i.FONE) || 0;
+                const v = parseInt(i.VIRTUA) || 0;
+                const t = parseInt(i.TV) || 0;
+                const c = parseInt(i.CHIP) || 0;
+                const d = parseInt(i.DCC) || 0;
+                const f = parseInt(i.FONE) || 0;
+                
+                virtua += v; tv += t; chip += c; dcc += d; fone += f;
+                
                 const val = typeof i.Valor === 'number' ? i.Valor : parseFloat(String(i.Valor || 0).replace(',', '.'));
                 total += val;
+                if(i.Vendedor) salesBySeller[i.Vendedor] = (salesBySeller[i.Vendedor] || 0) + val;
 
-                // Acumula para o Ranking
-                if(i.Vendedor) {
-                    salesBySeller[i.Vendedor] = (salesBySeller[i.Vendedor] || 0) + val;
-                }
+                if (idx < 100) {
+                    const empresaFull = i.Em || i.Empresa || '';
+                    
+                    // Busca inteligente pela coluna de produto
+                    let prodTexto = i.Produto || i.PRODUTO || i.Produtos || i.PRODUTOS || "";
+                    
+                    // Fallback: se estiver vazio no excel, gera pelos campos de contagem
+                    if (!prodTexto || prodTexto.trim() === "") {
+                        let partes = [];
+                        if (v > 0) partes.push("VIRTUA");
+                        if (t > 0) partes.push("TV");
+                        if (c > 0) partes.push("CHIP");
+                        if (f > 0) partes.push("FONE");
+                        prodTexto = partes.join(" + ");
+                    }
 
-                if (idx < 50) {
                     tbody.innerHTML += `
                         <tr>
-                            <td class="text-slate-400">${i.Data || ''}</td>
-                            <td class="font-bold text-[#EF3829]">${i.Em || i.Empresa || ''}</td>
-                            <td class="font-bold">${i.Cliente || ''}</td>
+                            <td class="font-bold text-slate-500">${empresaFull}</td>
+                            <td class="font-bold text-slate-800">${i.Cliente || ''}</td>
                             <td>${i.Vendedor || ''}</td>
-                            <td class="font-black">R$ ${val.toFixed(2)}</td>
+                            <td class="font-black text-slate-900">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                            <td class="text-slate-600 italic">${prodTexto}</td>
                         </tr>
                     `;
                 }
             });
 
-            // Renderiza Ranking
+            // Geração do Ranking
             const sortedRank = Object.entries(salesBySeller).sort((a, b) => b[1] - a[1]).slice(0, 5);
             const rankContainer = document.getElementById('rankingContainer');
             rankContainer.innerHTML = '';
-            
             sortedRank.forEach((item, index) => {
-                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<span class="text-slate-300">#${index+1}</span>`;
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
                 rankContainer.innerHTML += `
                     <div class="rank-item">
                         <div class="flex items-center gap-3">
-                            <div class="rank-number">${medal}</div>
+                            <span class="w-6 font-bold text-sm text-center">${medal}</span>
                             <span class="text-xs font-bold text-slate-700">${item[0]}</span>
                         </div>
                         <span class="text-xs font-black text-slate-900">R$ ${item[1].toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
@@ -257,6 +261,8 @@
             document.getElementById('valFaturamento').textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
         }
 
+        // Listeners de Filtro
+        document.getElementById('canalFilter').addEventListener('change', updateSups);
         document.getElementById('supFilter').addEventListener('change', updateSellers);
         document.getElementById('vendFilter').addEventListener('change', render);
     </script>
