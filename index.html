@@ -3,268 +3,617 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TechNet BI - Oficial</title>
+    <title>TechNET - Acompanhamento</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #0f172a; }
         :root { --claro-red: #EF3829; --claro-blue: #4184e1; }
-        
-        .kpi-card { background: white; border-radius: 16px; padding: 14px; border-left: 4px solid var(--claro-red); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        .kpi-blue { background-color: var(--claro-blue) !important; border-left-color: #2a61c7; }
-        
-        .filter-select { 
-            appearance: none; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; 
-            font-size: 0.85rem; font-weight: 600; width: 100%; color: #475569;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); 
-            background-repeat: no-repeat; background-position: right 0.8rem center; background-size: 1.2em; 
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #000; transition: background 0.3s; }
 
-        .table-responsive { overflow-x: auto; background: white; border-radius: 16px; border: 1px solid #e2e8f0; isolation: isolate; }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 900px; }
-        th { background: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; white-space: nowrap; }
+        body.dark-mode { background-color: #0f172a; color: #fff; }
+        body.dark-mode .bg-white:not(.keep-light) { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode header { background-color: #0f172a !important; border-bottom-color: #334155 !important; }
+        body.dark-mode header h1 { color: #fff !important; }
+        body.dark-mode td, body.dark-mode th { background: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important; }
+        body.dark-mode .multiselect-trigger { background: #1e293b !important; border-color: #334155 !important; color: #fff !important; }
+        body.dark-mode .multiselect-dropdown { background: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .ms-option:hover { background: #334155 !important; }
+        body.dark-mode .ms-option label { color: #e2e8f0 !important; }
+        body.dark-mode .ms-search input { background: #0f172a !important; border-color: #334155 !important; color: #fff !important; }
+        body.dark-mode .filter-select, body.dark-mode .search-input { background: #1e293b !important; border-color: #334155 !important; color: #fff !important; }
+        body.dark-mode .pagination-btn { background: #1e293b !important; border-color: #334155 !important; color: #e2e8f0 !important; }
+        body.dark-mode .pagination-btn.active { background: #EF3829 !important; color: #fff !important; border-color: #EF3829 !important; }
+        body.dark-mode .table-responsive { background: #1e293b !important; border-color: #334155 !important; }
 
+        .keep-light { background-color: #ffffff !important; color: #000000 !important; }
+        .keep-light .rank-item { border-bottom: 1px solid #f1f5f9; }
+        .keep-light span { color: #000000 !important; }
+        .keep-light .text-slate-400 { color: #94a3b8 !important; }
+
+        /* TABLE */
+        .table-responsive { background: white; border-radius: 16px; overflow-x: auto; border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 680px; }
+        th { background: #f8fafc; color: #64748b; font-weight: 800; padding: 10px 12px; text-align: left; text-transform: uppercase; font-size: 9px; letter-spacing: 0.06em; white-space: nowrap; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: #1e293b; font-weight: 600; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: #fafbfc; }
+
+        /* PAGINATION */
+        .pagination { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 12px 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; row-gap: 6px; }
+        .pagination-btn { min-width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid #e2e8f0; background: #fff; font-size: 12px; font-weight: 800; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; padding: 0 8px; font-family: 'Plus Jakarta Sans', sans-serif; }
+        .pagination-btn:hover:not(:disabled) { border-color: #EF3829; color: #EF3829; }
+        .pagination-btn.active { background: #EF3829; border-color: #EF3829; color: #fff; }
+        .pagination-btn:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+        .pagination-info { font-size: 10px; font-weight: 700; color: #94a3b8; }
+        .pagination-range { font-size: 10px; font-weight: 700; color: #94a3b8; width: 100%; text-align: center; }
+
+        /* KPI */
+        .kpi-card { background: white; border-radius: 16px; padding: 14px; border-left: 4px solid var(--claro-red); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .kpi-blue { background-color: var(--claro-blue) !important; color: white !important; border-left: none; }
+
+        /* FAB */
+        .fab-container { position: fixed; bottom: 22px; right: 18px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
+        .fab-main { width: 54px; height: 54px; border-radius: 27px; background: #000; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.3); border: none; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175,0.885,0.32,1.275); }
+        .fab-main.active { transform: rotate(45deg); background: #EF3829; }
+        .fab-options { display: none; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+        .fab-options.show { display: flex; animation: slideUp 0.25s ease forwards; }
+        .fab-mini { width: 44px; height: 44px; border-radius: 22px; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); border: none; cursor: pointer; }
+        @keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+        /* FILTERS */
+        .filter-select, .search-input { appearance: none; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; font-weight: 700; width: 100%; color: #000; font-size: 11px; outline: none; font-family: 'Plus Jakarta Sans', sans-serif; }
         .rank-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; }
-        label { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; display: block; margin-left: 4px; }
+        .badge-product { background-color: #f1f5f9; color: #1e293b; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; display: inline-block; white-space: normal; line-height: 1.4; max-width: 260px; }
+
+        /* MULTISELECT */
+        .multiselect-wrap { position: relative; width: 100%; }
+        .multiselect-trigger { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px 8px 12px; font-weight: 700; width: 100%; color: #000; font-size: 11px; cursor: pointer; display: flex; align-items: center; min-height: 36px; transition: border-color 0.15s; user-select: none; }
+        .multiselect-trigger.open { border-color: #EF3829; }
+        .trigger-text { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+        .trigger-arrow { flex-shrink:0; margin-left:4px; color:#94a3b8; transition:transform 0.2s; }
+        .multiselect-trigger.open .trigger-arrow { transform:rotate(180deg); }
+        .trigger-badge { background:#EF3829; color:#fff; font-size:9px; font-weight:900; padding:1px 6px; border-radius:20px; margin-right:5px; flex-shrink:0; }
+        .multiselect-dropdown { position:absolute; top:calc(100% + 4px); left:0; right:0; background:#fff; border:1px solid #e2e8f0; border-radius:12px; z-index:500; box-shadow:0 8px 24px rgba(0,0,0,0.12); display:none; overflow:hidden; }
+        .multiselect-dropdown.open { display:block; }
+        .ms-search { padding:8px 10px; border-bottom:1px solid #f1f5f9; }
+        .ms-search input { width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:6px 10px; font-size:11px; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif; outline:none; color:#000; }
+        .ms-search input:focus { border-color:#EF3829; }
+        .ms-all { padding:8px 12px; border-bottom:1px solid #f1f5f9; display:flex; align-items:center; gap:8px; cursor:pointer; font-size:11px; font-weight:800; color:#475569; }
+        .ms-all:hover { background:#f8fafc; }
+        .ms-options-list { max-height:180px; overflow-y:auto; }
+        .ms-options-list::-webkit-scrollbar { width:4px; }
+        .ms-options-list::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:4px; }
+        .ms-option { padding:8px 12px; display:flex; align-items:center; gap:8px; cursor:pointer; }
+        .ms-option:hover { background:#fef2f2; }
+        .ms-option.checked { background:#fff5f5; }
+        .ms-option input[type="checkbox"] { width:15px; height:15px; accent-color:#EF3829; cursor:pointer; flex-shrink:0; }
+        .ms-option label { font-size:11px; font-weight:700; color:#1e293b; cursor:pointer; flex:1; }
+        .ms-footer { padding:8px 10px; border-top:1px solid #f1f5f9; display:flex; gap:6px; }
+        .ms-btn-apply { flex:1; background:#EF3829; color:#fff; border:none; border-radius:8px; padding:7px; font-size:11px; font-weight:800; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; }
+        .ms-btn-apply:hover { background:#c42e22; }
+        .ms-btn-clear { background:#f1f5f9; color:#475569; border:none; border-radius:8px; padding:7px 12px; font-size:11px; font-weight:800; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; }
+
+        /* LOADING */
+        #loadingOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:9999; display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+        #loadingOverlay.show { display:flex; }
+        .loading-spinner { width:44px; height:44px; border:4px solid rgba(255,255,255,0.2); border-top-color:#EF3829; border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* SHARE BOTTOM SHEET */
+        #shareModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9998; align-items:flex-end; justify-content:center; }
+        #shareModal.show { display:flex; }
+        .share-sheet { background:#fff; border-radius:20px 20px 0 0; padding:20px 16px 28px; width:100%; max-width:480px; animation:slideSheet 0.28s ease; }
+        @keyframes slideSheet { from { transform:translateY(100%); } to { transform:translateY(0); } }
+        .share-handle { width:36px; height:4px; background:#e2e8f0; border-radius:2px; margin:0 auto 16px; }
+        .share-title { font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px; }
+        .share-option { display:flex; align-items:center; gap:12px; padding:13px 10px; border-radius:12px; cursor:pointer; transition:background 0.15s; margin-bottom:3px; }
+        .share-option:hover { background:#f8fafc; }
+        .share-option:active { background:#f1f5f9; }
+        .share-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+        .share-option-label { font-size:13px; font-weight:800; color:#1e293b; }
+        .share-option-sub { font-size:10px; font-weight:600; color:#94a3b8; margin-top:1px; }
+        .share-cancel { width:100%; margin-top:10px; padding:13px; border-radius:12px; background:#f1f5f9; border:none; font-size:13px; font-weight:800; color:#64748b; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; }
+
+        /* EXPORT CANVAS */
+        #exportCanvas { position:fixed; left:-9999px; top:0; width:900px; background:#fff; font-family:'Plus Jakarta Sans',sans-serif; padding:32px 36px; box-sizing:border-box; z-index: -100; }
+        #exportCanvas .exp-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; border-bottom:3px solid #EF3829; padding-bottom:14px; }
+        #exportCanvas .exp-title { font-size:22px; font-weight:900; color:#0f172a; }
+        #exportCanvas .exp-subtitle { font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-top:3px; }
+        #exportCanvas .exp-tag { background:#EF3829; color:#fff; font-size:10px; font-weight:900; padding:3px 10px; border-radius:20px; display:inline-block; margin-bottom:4px; }
+        #exportCanvas .exp-date { font-size:10px; color:#94a3b8; font-weight:700; text-align:right; }
+        #exportCanvas .exp-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
+        #exportCanvas .exp-kpi { background:#f8fafc; border-radius:8px; padding:10px; border-left:3px solid #EF3829; }
+        #exportCanvas .exp-kpi-label { font-size:8px; font-weight:800; color:#94a3b8; text-transform:uppercase; }
+        #exportCanvas .exp-kpi-val { font-size:22px; font-weight:900; color:#EF3829; }
+        #exportCanvas .exp-fat { background:#0f172a; border-radius:10px; padding:12px 18px; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between; }
+        #exportCanvas .exp-fat-label { font-size:9px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.15em; }
+        #exportCanvas .exp-fat-val { font-size:26px; font-weight:900; color:#fff; }
+        #exportCanvas table { width:100%; border-collapse:collapse; font-size:9px; }
+        #exportCanvas th { background:#f1f5f9; color:#475569; font-weight:900; padding:8px 10px; text-align:left; text-transform:uppercase; font-size:8px; border-bottom:2px solid #e2e8f0; }
+        #exportCanvas td { padding:6px 10px; border-bottom:1px solid #f1f5f9; color:#1e293b; font-weight:600; word-break:break-word; vertical-align:top; }
+        #exportCanvas tr:nth-child(even) td { background:#fafafa; }
+        #exportCanvas .exp-c { font-weight:900; color:#EF3829; }
+        #exportCanvas .exp-v { font-weight:900; color:#0f172a; }
+        #exportCanvas .exp-b { background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-size:8px; font-weight:800; }
+        #exportCanvas .exp-footer { margin-top:16px; text-align:center; font-size:8px; color:#cbd5e1; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; }
     </style>
 </head>
-<body class="pb-10">
+<body class="pb-24">
 
-    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 p-4 shadow-sm">
+    <div id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <span style="color:#fff;font-weight:800;font-size:13px;" id="loadingText">Gerando relatório...</span>
+    </div>
+
+    <div id="shareModal" onclick="if(event.target===this)this.classList.remove('show')">
+        <div class="share-sheet">
+            <div class="share-handle"></div>
+            <div class="share-title">Compartilhar relatório</div>
+
+            <div class="share-option" onclick="shareAction('whatsapp_text')">
+                <div class="share-icon" style="background:#f0fdf4;">💬</div>
+                <div>
+                    <div class="share-option-label">WhatsApp — Resumo em texto</div>
+                    <div class="share-option-sub">Abre o WhatsApp com os KPIs formatados</div>
+                </div>
+            </div>
+
+            <div class="share-option" onclick="shareAction('whatsapp_image')">
+                <div class="share-icon" style="background:#fff0ef;">🖼️</div>
+                <div>
+                    <div class="share-option-label">WhatsApp — Imagem do relatório</div>
+                    <div class="share-option-sub">Gera imagem dos dados filtrados</div>
+                </div>
+            </div>
+
+            <div class="share-option" onclick="shareAction('copy')">
+                <div class="share-icon" style="background:#f8fafc;">📋</div>
+                <div>
+                    <div class="share-option-label">Copiar texto</div>
+                    <div class="share-option-sub">Copia o resumo para área de transferência</div>
+                </div>
+            </div>
+
+            <button class="share-cancel" onclick="document.getElementById('shareModal').classList.remove('show')">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="exportCanvas"></div>
+
+    <div class="fab-container">
+        <button id="fabMain" class="fab-main"><i data-lucide="plus"></i></button>
+        <div id="fabOptions" class="fab-options">
+            <button class="fab-mini bg-[#25D366]" onclick="openShareModal()"><i data-lucide="share-2"></i></button>
+            <button id="themeToggle" class="fab-mini bg-slate-700"><i data-lucide="moon" id="themeIcon"></i></button>
+        </div>
+    </div>
+
+    <header class="sticky top-0 z-50 bg-white border-b border-slate-200 p-4">
         <div class="max-w-md mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-base font-extrabold tracking-tighter flex items-center gap-2">
-                    <span class="w-2.5 h-2.5 bg-[#EF3829] rounded-full"></span> TECHNET VENDAS
-                </h1>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Dash de Performance</p>
+                <h1 class="text-xl font-black tracking-tighter text-slate-900">TechNET</h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">ACOMPANHAMENTO</p>
             </div>
-            <label for="excelInput" class="text-[10px] bg-[#EF3829] text-white font-bold px-3 py-2 rounded-lg cursor-pointer active:scale-95 transition m-0">IMPORTAR</label>
-            <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden">
+            <div onclick="location.reload()" class="p-2 bg-slate-50 rounded-full cursor-pointer">
+                <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-400"></i>
+            </div>
         </div>
     </header>
 
     <main class="p-4 max-w-md mx-auto space-y-5">
-        <div id="dashboardView" class="hidden space-y-5">
-            
-            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                <div>
-                    <label>Canal de Venda</label>
-                    <select id="canalFilter" class="filter-select shadow-sm">
-                        <option value="all">VNA + RDT (Todos)</option>
-                        <option value="VNA">VNA</option>
-                        <option value="RDT">RDT</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-1 gap-3">
-                    <div>
-                        <label>Supervisor</label>
-                        <select id="supFilter" class="filter-select shadow-sm"></select>
-                    </div>
-                    <div>
-                        <label>Vendedor</label>
-                        <select id="vendFilter" class="filter-select shadow-sm"></select>
-                    </div>
-                </div>
-            </div>
 
+        <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+            <div>
+                <label class="text-[9px] font-extrabold uppercase ml-1 mb-1 block text-slate-400">Canal de Venda</label>
+                <select id="canalFilter" class="filter-select"></select>
+            </div>
             <div class="grid grid-cols-2 gap-3">
-                <div class="kpi-card"><p class="text-[9px] font-bold text-slate-400 uppercase">Virtua</p><h2 id="valVirtua" class="text-2xl font-black text-[#EF3829]">0</h2></div>
-                <div class="kpi-card"><p class="text-[9px] font-bold text-slate-400 uppercase">TV</p><h2 id="valTV" class="text-2xl font-black text-[#EF3829]">0</h2></div>
-                <div class="kpi-card"><p class="text-[9px] font-bold text-slate-400 uppercase">Chip</p><h2 id="valChip" class="text-2xl font-black text-[#EF3829]">0</h2></div>
-                <div class="kpi-card"><p class="text-[9px] font-bold text-slate-400 uppercase">Fone</p><h2 id="valFone" class="text-2xl font-black text-[#EF3829]">0</h2></div>
-            </div>
-
-            <div class="space-y-3">
-                <div class="kpi-card kpi-blue">
-                    <p class="text-[9px] font-bold text-white uppercase opacity-80">Volume DCC</p>
-                    <h2 id="valDCC" class="text-3xl font-black text-white">0</h2>
+                <div>
+                    <label class="text-[9px] font-extrabold uppercase ml-1 mb-1 block text-slate-400">Supervisor</label>
+                    <div class="multiselect-wrap">
+                        <div class="multiselect-trigger" id="supTrigger" tabindex="0">
+                            <span class="trigger-text" id="supTriggerText">TODOS SUPERVISORES</span>
+                            <svg class="trigger-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <div class="multiselect-dropdown" id="supDropdown">
+                            <div class="ms-search"><input type="text" placeholder="Buscar..." id="supSearch"></div>
+                            <div class="ms-all"><input type="checkbox" id="supAllCheck"><label for="supAllCheck">Selecionar todos</label></div>
+                            <div class="ms-options-list" id="supOptionsList"></div>
+                            <div class="ms-footer"><button class="ms-btn-clear" id="supClear">Limpar</button><button class="ms-btn-apply" id="supApply">Aplicar</button></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-[#0f172a] rounded-2xl p-5 border-l-8 border-[#EF3829] shadow-lg">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faturamento Filtrado</p>
-                    <h2 id="valFaturamento" class="text-3xl font-black text-white tracking-tight mt-1">R$ 0,00</h2>
+                <div>
+                    <label class="text-[9px] font-extrabold uppercase ml-1 mb-1 block text-slate-400">Vendedor</label>
+                    <div class="multiselect-wrap">
+                        <div class="multiselect-trigger" id="vendTrigger" tabindex="0">
+                            <span class="trigger-text" id="vendTriggerText">TODOS VENDEDORES</span>
+                            <svg class="trigger-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+                        </div>
+                        <div class="multiselect-dropdown" id="vendDropdown">
+                            <div class="ms-search"><input type="text" placeholder="Buscar..." id="vendSearch"></div>
+                            <div class="ms-all"><input type="checkbox" id="vendAllCheck"><label for="vendAllCheck">Selecionar todos</label></div>
+                            <div class="ms-options-list" id="vendOptionsList"></div>
+                            <div class="ms-footer"><button class="ms-btn-clear" id="vendClear">Limpar</button><button class="ms-btn-apply" id="vendApply">Aplicar</button></div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <div class="table-responsive shadow-sm">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Empresa</th>
-                            <th>Cliente</th>
-                            <th>Vendedor</th>
-                            <th>Valor</th>
-                            <th>Produto</th>
-                        </tr>
-                    </thead>
-                    <tbody id="salesTableBody"></tbody>
-                </table>
-            </div>
-
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="bg-slate-50 p-4 border-b border-slate-100 flex items-center gap-2">
-                    <i data-lucide="trophy" class="w-4 h-4 text-yellow-500"></i>
-                    <h3 class="text-xs font-extrabold uppercase tracking-tighter">Ranking de Faturamento</h3>
-                </div>
-                <div id="rankingContainer" class="p-2"></div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="kpi-card"><div class="flex justify-between items-start mb-1"><p class="text-[10px] font-bold text-slate-400 uppercase">Virtua</p><i data-lucide="wifi" class="w-3.5 h-3.5 text-slate-300"></i></div><h2 id="valVirtua" class="text-2xl font-black text-[#EF3829]">0</h2></div>
+            <div class="kpi-card"><div class="flex justify-between items-start mb-1"><p class="text-[10px] font-bold text-slate-400 uppercase">TV</p><i data-lucide="tv" class="w-3.5 h-3.5 text-slate-300"></i></div><h2 id="valTV" class="text-2xl font-black text-[#EF3829]">0</h2></div>
+            <div class="kpi-card"><div class="flex justify-between items-start mb-1"><p class="text-[10px] font-bold text-slate-400 uppercase">Chip</p><i data-lucide="smartphone" class="w-3.5 h-3.5 text-slate-300"></i></div><h2 id="valChip" class="text-2xl font-black text-[#EF3829]">0</h2></div>
+            <div class="kpi-card"><div class="flex justify-between items-start mb-1"><p class="text-[10px] font-bold text-slate-400 uppercase">Fone</p><i data-lucide="phone" class="w-3.5 h-3.5 text-slate-300"></i></div><h2 id="valFone" class="text-2xl font-black text-[#EF3829]">0</h2></div>
+        </div>
+        <div class="space-y-3">
+            <div class="kpi-card kpi-blue"><p class="text-[10px] font-bold uppercase text-white/70">Volume DCC</p><h2 id="valDCC" class="text-3xl font-black">0</h2></div>
+            <div class="bg-slate-900 rounded-2xl p-5 border-l-8 border-[#EF3829]">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Faturamento</p>
+                <h2 id="valFaturamento" class="text-3xl font-black text-white mt-1">R$ 0,00</h2>
             </div>
         </div>
 
-        <div id="setupView" class="py-20 text-center space-y-4">
-            <i data-lucide="upload" class="w-12 h-12 text-slate-300 mx-auto"></i>
-            <h2 class="text-xl font-bold">TechNet BI</h2>
-            <p class="text-sm text-slate-500">Importe sua planilha de vendas (Excel) para começar.</p>
+        <div class="space-y-2">
+            <div class="flex justify-between items-center px-1">
+                <label class="text-[9px] font-extrabold uppercase block text-slate-400">Pesquisar Contrato</label>
+                <span id="rowCount" class="text-[9px] font-black bg-slate-200 px-2 py-0.5 rounded-full">0 CONTRATOS</span>
+            </div>
+            <div class="relative">
+                <input type="text" id="contractSearch" class="search-input" placeholder="Ex: 899/12345...">
+                <i data-lucide="search" class="w-3 h-3 absolute right-3 top-3 text-slate-400"></i>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead><tr>
+                    <th>Contrato</th><th>Empresa</th><th>Cliente</th>
+                    <th>Vendedor</th><th>Valor</th><th>Produtos</th>
+                </tr></thead>
+                <tbody id="salesTableBody"></tbody>
+            </table>
+            <div class="pagination" id="paginationWrap"></div>
+        </div>
+
+        <div class="bg-white keep-light rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="bg-slate-50 p-4 border-b border-slate-100">
+                <h3 class="text-xs font-black uppercase flex items-center gap-2">
+                    <i data-lucide="award" class="w-4 h-4 text-yellow-500"></i> Ranking de Faturamento
+                </h3>
+            </div>
+            <div id="rankingContainer" class="p-2"></div>
         </div>
     </main>
 
     <script>
         lucide.createIcons();
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMJts8HbEurDxnDxFInkRfhPjqtQ6qY7F17zVSpdXfpFwFNMKMqMRLHLcXF6DZa81wEjklVvkW8mcl/pub?output=csv';
+
         let rawData = [];
+        let currentFiltered = [];
+        let selectedSups  = new Set();
+        let selectedVends = new Set();
+        const PAGE_SIZE = 20;
+        let currentPage = 1;
 
-        document.getElementById('excelInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        // ── FAB ───────────────────────────────────────────────
+        const fabMain = document.getElementById('fabMain');
+        const fabOptions = document.getElementById('fabOptions');
+        fabMain.addEventListener('click', () => { fabMain.classList.toggle('active'); fabOptions.classList.toggle('show'); });
 
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const data = evt.target.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(worksheet);
-
-                // Normaliza chaves para evitar problemas com espaços ou acentos
-                rawData = json.map(row => {
-                    let nRow = {};
-                    for (let k in row) nRow[k.trim()] = row[k];
-                    return nRow;
-                });
-
-                document.getElementById('setupView').style.display = 'none';
-                document.getElementById('dashboardView').classList.remove('hidden');
-                initFilters();
-            };
-            reader.readAsBinaryString(file);
+        // ── TEMA ──────────────────────────────────────────────
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            document.getElementById('themeIcon').setAttribute('data-lucide', document.body.classList.contains('dark-mode') ? 'sun' : 'moon');
+            lucide.createIcons();
         });
 
-        function initFilters() {
-            updateSups();
+        // ── SHARE ─────────────────────────────────────────────
+        function openShareModal() {
+            fabMain.classList.remove('active'); fabOptions.classList.remove('show');
+            document.getElementById('shareModal').classList.add('show');
         }
 
-        function updateSups() {
-            const sCanal = document.getElementById('canalFilter').value;
-            const filteredByCanal = rawData.filter(i => {
-                if (sCanal === 'all') return true;
-                return String(i.Em || i.Empresa || '').toUpperCase().includes(sCanal);
-            });
-            const sups = [...new Set(filteredByCanal.map(i => i.Supervisor))].filter(Boolean).sort();
-            document.getElementById('supFilter').innerHTML = '<option value="all">Todos Supervisores</option>' + 
-                sups.map(s => `<option value="${s}">${s}</option>`).join('');
-            updateSellers();
+        function getResumoText() {
+            const canal = document.getElementById('canalFilter').value;
+            let titulo = "RELATÓRIO TOTAL";
+            if (selectedVends.size === 1)      titulo = `RELATÓRIO CONSULTOR: ${[...selectedVends][0].toUpperCase()}`;
+            else if (selectedVends.size > 1)   titulo = `RELATÓRIO CONSULTORES: ${selectedVends.size} selecionados`;
+            else if (selectedSups.size === 1)  titulo = `RELATÓRIO EQUIPE: ${[...selectedSups][0].toUpperCase()}`;
+            else if (selectedSups.size > 1)    titulo = `RELATÓRIO SUPERVISORES: ${selectedSups.size} selecionados`;
+            else if (canal !== 'all')          titulo = `RELATÓRIO CANAL: ${canal.toUpperCase()}`;
+            const agora = new Date();
+            return `*${titulo}*\n\n💰 *Faturamento:* ${document.getElementById('valFaturamento').innerText}\n📄 *Contratos:* ${document.getElementById('rowCount').innerText}\n\n🌐 *Virtua:* ${document.getElementById('valVirtua').innerText}\n📺 *TV:* ${document.getElementById('valTV').innerText}\n📱 *Chip:* ${document.getElementById('valChip').innerText}\n📞 *Fone:* ${document.getElementById('valFone').innerText}\n💳 *DCC:* ${document.getElementById('valDCC').innerText}\n\n_Enviado em: ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}_`;
         }
 
-        function updateSellers() {
-            const sCanal = document.getElementById('canalFilter').value;
-            const sSup = document.getElementById('supFilter').value;
-            const filtered = rawData.filter(i => {
-                const canalMatch = sCanal === 'all' || String(i.Em || i.Empresa || '').toUpperCase().includes(sCanal);
-                const supMatch = sSup === 'all' || i.Supervisor === sSup;
-                return canalMatch && supMatch;
-            });
-            const sellers = [...new Set(filtered.map(i => i.Vendedor))].filter(Boolean).sort();
-            document.getElementById('vendFilter').innerHTML = '<option value="all">Todos Vendedores</option>' + 
-                sellers.map(v => `<option value="${v}">${v}</option>`).join('');
-            render();
+        async function shareAction(type) {
+            document.getElementById('shareModal').classList.remove('show');
+
+            if (type === 'whatsapp_text') {
+                window.open(`https://wa.me/?text=${encodeURIComponent(getResumoText())}`, '_blank');
+                return;
+            }
+            if (type === 'copy') {
+                try { await navigator.clipboard.writeText(getResumoText()); alert('✅ Texto copiado! Cole no WhatsApp.'); }
+                catch { alert('Não foi possível copiar. Tente novamente.'); }
+                return;
+            }
+            if (type === 'whatsapp_image') {
+                if (!currentFiltered.length) { alert('Nenhum dado para exportar.'); return; }
+                showLoading(true, 'Gerando imagem...');
+                try {
+                    if (!window.html2canvas) {
+                        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+                    }
+                    const canvas = document.getElementById('exportCanvas');
+                    
+                    // RECONSTRUÇÃO DO HTML COM DADOS FILTRADOS ATUAIS
+                    canvas.innerHTML = buildExportHTML(currentFiltered);
+                    
+                    // Espera fontes e renderização do DOM
+                    await document.fonts.ready;
+                    await new Promise(r => setTimeout(r, 500)); 
+
+                    const c = await html2canvas(canvas, { 
+                        scale: 2, 
+                        useCORS: true, 
+                        backgroundColor: '#ffffff', 
+                        width: 900,
+                        logging: false
+                    });
+                    
+                    canvas.innerHTML = ''; // Limpa após gerar
+
+                    c.toBlob(async blob => {
+                        showLoading(false);
+                        const file = new File([blob], 'relatorio_technet.png', { type:'image/png' });
+
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files:[file] })) {
+                            try {
+                                await navigator.share({ files:[file], title:'TechNET — Relatório', text: getResumoText() });
+                                return;
+                            } catch(e) { return; }
+                        }
+
+                        // Fallback
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = 'relatorio_technet.png'; a.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 3000);
+                        alert('📲 Imagem salva! Envie pelo WhatsApp pela galeria do seu celular.');
+                    }, 'image/png');
+
+                } catch(e) {
+                    showLoading(false);
+                    console.error(e);
+                    alert('Erro ao gerar imagem. Tente novamente.');
+                }
+            }
         }
 
-        function render() {
-            const sCanal = document.getElementById('canalFilter').value;
-            const sSup = document.getElementById('supFilter').value;
-            const sVend = document.getElementById('vendFilter').value;
+        function loadScript(src) {
+            return new Promise((res,rej) => { const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+        }
+        function showLoading(show, text='Gerando...') {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingOverlay').classList.toggle('show', show);
+        }
 
-            const filtered = rawData.filter(i => {
-                const canalMatch = sCanal === 'all' || String(i.Em || i.Empresa || '').toUpperCase().includes(sCanal);
-                const supMatch = sSup === 'all' || i.Supervisor === sSup;
-                const vendMatch = sVend === 'all' || i.Vendedor === sVend;
-                return canalMatch && supMatch && vendMatch;
+        // ── EXPORT HTML ───────────────────────────────────────
+        function buildExportHTML(data) {
+            const canal = document.getElementById('canalFilter').value;
+            let tag='GERAL', name='TODOS OS DADOS';
+            
+            // Lógica de Título Dinâmico na Imagem
+            if (selectedVends.size===1) { tag='CONSULTOR'; name=[...selectedVends][0]; }
+            else if (selectedVends.size>1) { tag='CONSULTORES'; name=`${selectedVends.size} selecionados`; }
+            else if (selectedSups.size===1) { tag='SUPERVISOR'; name=[...selectedSups][0]; }
+            else if (selectedSups.size>1) { tag='SUPERVISORES'; name=`${selectedSups.size} selecionados`; }
+            else if (canal!=='all') { tag='CANAL'; name=canal; }
+
+            const agora = new Date();
+            let vT=0,tT=0,cT=0,dT=0,fT=0,fat=0;
+            
+            // Calcula KPIs apenas dos dados filtrados enviados para a função
+            data.forEach(i => {
+                vT+=parseInt(i.VIRTUA)||0; tT+=parseInt(i.TV)||0;
+                cT+=parseInt(i.CHIP)||0;  dT+=parseInt(i.DCC)||0; fT+=parseInt(i.FONE)||0;
+                fat+=parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
             });
 
-            let virtua = 0, tv = 0, chip = 0, dcc = 0, fone = 0, total = 0;
+            // Limita a tabela na imagem para não ficar gigante (opcional, aqui deixei todos os filtrados)
+            const rows = data.map(i => {
+                const val = parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
+                const prod = (i["Produto Detalhado"]||i["Produtos"]||"N/A").toUpperCase();
+                return `<tr><td class="exp-c">${i.Contrato||'-'}</td><td>${i.Empresa||i.Em||''}</td><td><strong>${i.Cliente||''}</strong></td><td>${i.Vendedor||''}</td><td class="exp-v">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td><span class="exp-b">${prod}</span></td></tr>`;
+            }).join('');
+
+            return `
+            <div style="padding: 30px; background: white;">
+                <div class="exp-header">
+                    <div><div class="exp-title">TechNET</div><div class="exp-subtitle">Detalhamento de Vendas</div></div>
+                    <div class="exp-date"><span class="exp-tag">${tag}: ${name}</span><br>Gerado em ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+                </div>
+                <div class="exp-kpis">
+                    <div class="exp-kpi"><div class="exp-kpi-label">Virtua</div><div class="exp-kpi-val">${vT}</div></div>
+                    <div class="exp-kpi"><div class="exp-kpi-label">TV</div><div class="exp-kpi-val">${tT}</div></div>
+                    <div class="exp-kpi"><div class="exp-kpi-label">Chip</div><div class="exp-kpi-val">${cT}</div></div>
+                    <div class="exp-kpi"><div class="exp-kpi-label">Fone</div><div class="exp-kpi-val">${fT}</div></div>
+                    <div class="exp-kpi"><div class="exp-kpi-label">DCC</div><div class="exp-kpi-val">${dT}</div></div>
+                </div>
+                <div class="exp-fat">
+                    <div class="exp-fat-label">Faturamento Total</div>
+                    <div class="exp-fat-val">R$ ${fat.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+                </div>
+                <table>
+                    <thead><tr><th>Contrato</th><th>Empresa</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Produtos</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+                <div class="exp-footer">TechNET Acompanhamento • ${agora.toLocaleDateString('pt-BR')} • ${data.length} contratos</div>
+            </div>`;
+        }
+
+        // ── PAGINAÇÃO ─────────────────────────────────────────
+        function totalPages() { return Math.max(1, Math.ceil(currentFiltered.length / PAGE_SIZE)); }
+
+        function renderPage() {
+            const start = (currentPage-1) * PAGE_SIZE;
+            const pageData = currentFiltered.slice(start, start + PAGE_SIZE);
             const tbody = document.getElementById('salesTableBody');
             tbody.innerHTML = '';
-            const salesBySeller = {};
-
-            filtered.forEach((i, idx) => {
-                const v = parseInt(i.VIRTUA) || 0;
-                const t = parseInt(i.TV) || 0;
-                const c = parseInt(i.CHIP) || 0;
-                const d = parseInt(i.DCC) || 0;
-                const f = parseInt(i.FONE) || 0;
-                
-                virtua += v; tv += t; chip += c; dcc += d; fone += f;
-                
-                const val = typeof i.Valor === 'number' ? i.Valor : parseFloat(String(i.Valor || 0).replace(',', '.'));
-                total += val;
-                if(i.Vendedor) salesBySeller[i.Vendedor] = (salesBySeller[i.Vendedor] || 0) + val;
-
-                if (idx < 100) {
-                    const empresaFull = i.Em || i.Empresa || '';
-                    
-                    // Busca inteligente pela coluna de produto
-                    let prodTexto = i.Produto || i.PRODUTO || i.Produtos || i.PRODUTOS || "";
-                    
-                    // Fallback: se estiver vazio no excel, gera pelos campos de contagem
-                    if (!prodTexto || prodTexto.trim() === "") {
-                        let partes = [];
-                        if (v > 0) partes.push("VIRTUA");
-                        if (t > 0) partes.push("TV");
-                        if (c > 0) partes.push("CHIP");
-                        if (f > 0) partes.push("FONE");
-                        prodTexto = partes.join(" + ");
-                    }
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td class="font-bold text-slate-500">${empresaFull}</td>
-                            <td class="font-bold text-slate-800">${i.Cliente || ''}</td>
-                            <td>${i.Vendedor || ''}</td>
-                            <td class="font-black text-slate-900">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                            <td class="text-slate-600 italic">${prodTexto}</td>
-                        </tr>
-                    `;
-                }
+            pageData.forEach(i => {
+                const val = parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
+                const prod = (i["Produto Detalhado"]||i["Produtos"]||"N/A").toUpperCase();
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:800;color:#EF3829;">${i.Contrato||'-'}</td>
+                    <td>${i.Empresa||i.Em||''}</td>
+                    <td style="font-weight:700;">${i.Cliente||''}</td>
+                    <td>${i.Vendedor||''}</td>
+                    <td style="font-weight:900;">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                    <td><span class="badge-product">${prod}</span></td>`;
+                tbody.appendChild(tr);
             });
-
-            // Geração do Ranking
-            const sortedRank = Object.entries(salesBySeller).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            const rankContainer = document.getElementById('rankingContainer');
-            rankContainer.innerHTML = '';
-            sortedRank.forEach((item, index) => {
-                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index+1}`;
-                rankContainer.innerHTML += `
-                    <div class="rank-item">
-                        <div class="flex items-center gap-3">
-                            <span class="w-6 font-bold text-sm text-center">${medal}</span>
-                            <span class="text-xs font-bold text-slate-700">${item[0]}</span>
-                        </div>
-                        <span class="text-xs font-black text-slate-900">R$ ${item[1].toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>
-                    </div>
-                `;
-            });
-
-            document.getElementById('valVirtua').textContent = virtua;
-            document.getElementById('valTV').textContent = tv;
-            document.getElementById('valChip').textContent = chip;
-            document.getElementById('valDCC').textContent = dcc;
-            document.getElementById('valFone').textContent = fone;
-            document.getElementById('valFaturamento').textContent = `R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            renderPagination();
         }
 
-        // Listeners de Filtro
-        document.getElementById('canalFilter').addEventListener('change', updateSups);
-        document.getElementById('supFilter').addEventListener('change', updateSellers);
-        document.getElementById('vendFilter').addEventListener('change', render);
+        function renderPagination() {
+            const wrap = document.getElementById('paginationWrap');
+            const tp = totalPages();
+            if (tp <= 1) { wrap.innerHTML = ''; return; }
+            const p = currentPage;
+
+            const pages = new Set([1, tp, p, p-1, p+1].filter(x => x >= 1 && x <= tp));
+            const sorted = [...pages].sort((a,b)=>a-b);
+            let html = `<button class="pagination-btn" onclick="goPage(${p-1})" ${p===1?'disabled':''}>‹</button>`;
+            let prev = null;
+            sorted.forEach(n => {
+                if (prev !== null && n - prev > 1) html += `<span class="pagination-info">…</span>`;
+                html += `<button class="pagination-btn ${n===p?'active':''}" onclick="goPage(${n})">${n}</button>`;
+                prev = n;
+            });
+            html += `<button class="pagination-btn" onclick="goPage(${p+1})" ${p===tp?'disabled':''}>›</button>`;
+            const s = (p-1)*PAGE_SIZE+1, e = Math.min(p*PAGE_SIZE, currentFiltered.length);
+            html += `<span class="pagination-range">${s}–${e} de ${currentFiltered.length} registros</span>`;
+            wrap.innerHTML = html;
+        }
+
+        function goPage(n) {
+            if (n < 1 || n > totalPages()) return;
+            currentPage = n;
+            renderPage();
+            document.querySelector('.table-responsive').scrollIntoView({ behavior:'smooth', block:'nearest' });
+        }
+
+        // ── MULTISELECT ENGINE ────────────────────────────────
+        function buildMultiselect({ triggerId, dropdownId, searchId, listId, allCheckId, clearId, applyId, triggerTextId, selectedSet, onApply, label }) {
+            const trigger=document.getElementById(triggerId), dropdown=document.getElementById(dropdownId),
+                  searchEl=document.getElementById(searchId), listEl=document.getElementById(listId),
+                  allCheck=document.getElementById(allCheckId), clearBtn=document.getElementById(clearId),
+                  applyBtn=document.getElementById(applyId), textEl=document.getElementById(triggerTextId);
+            let pending=new Set();
+
+            const open=()=>{ dropdown.classList.add('open'); trigger.classList.add('open'); searchEl.value=''; filterOpts(''); pending=new Set(selectedSet); sync(); };
+            const close=()=>{ dropdown.classList.remove('open'); trigger.classList.remove('open'); };
+            trigger.addEventListener('click', e=>{ e.stopPropagation(); dropdown.classList.contains('open')?close():open(); });
+            document.addEventListener('click', e=>{ if(!trigger.closest('.multiselect-wrap').contains(e.target)) close(); });
+            searchEl.addEventListener('input', ()=>filterOpts(searchEl.value));
+
+            function filterOpts(q) { listEl.querySelectorAll('.ms-option').forEach(o=>{ o.style.display=o.dataset.value.toLowerCase().includes(q.toLowerCase())?'':'none'; }); }
+            function sync() {
+                listEl.querySelectorAll('.ms-option input').forEach(cb=>{ cb.checked=pending.has(cb.value); cb.closest('.ms-option').classList.toggle('checked',cb.checked); });
+                const all=[...listEl.querySelectorAll('.ms-option')];
+                allCheck.checked=all.length>0&&all.every(o=>pending.has(o.dataset.value));
+            }
+            allCheck.addEventListener('change', ()=>{ listEl.querySelectorAll('.ms-option').forEach(o=>allCheck.checked?pending.add(o.dataset.value):pending.delete(o.dataset.value)); sync(); });
+            listEl.addEventListener('change', e=>{ if(e.target.type!=='checkbox')return; e.target.checked?pending.add(e.target.value):pending.delete(e.target.value); sync(); });
+            clearBtn.addEventListener('click', ()=>{ pending.clear(); sync(); });
+            applyBtn.addEventListener('click', ()=>{ selectedSet.clear(); pending.forEach(v=>selectedSet.add(v)); updateText(); close(); onApply(); });
+
+            function updateText() {
+                const old=trigger.querySelector('.trigger-badge'); if(old)old.remove();
+                if(selectedSet.size===0) { textEl.textContent=label; }
+                else {
+                    const b=document.createElement('span'); b.className='trigger-badge'; b.textContent=selectedSet.size;
+                    trigger.insertBefore(b,textEl);
+                    textEl.textContent=selectedSet.size===1?[...selectedSet][0]:`${selectedSet.size} selecionados`;
+                }
+            }
+            return {
+                populate(items) { listEl.innerHTML=items.map(v=>`<div class="ms-option ${selectedSet.has(v)?'checked':''}" data-value="${v}"><input type="checkbox" value="${v}" ${selectedSet.has(v)?'checked':''}><label>${v}</label></div>`).join(''); sync(); updateText(); },
+                reset() { selectedSet.clear(); updateText(); }
+            };
+        }
+
+        const supMS  = buildMultiselect({ triggerId:'supTrigger',  dropdownId:'supDropdown',  searchId:'supSearch',  listId:'supOptionsList',  allCheckId:'supAllCheck',  clearId:'supClear',  applyId:'supApply',  triggerTextId:'supTriggerText',  selectedSet:selectedSups,  label:'TODOS SUPERVISORES', onApply:()=>{ rebuildVendors(); render(); } });
+        const vendMS = buildMultiselect({ triggerId:'vendTrigger', dropdownId:'vendDropdown', searchId:'vendSearch', listId:'vendOptionsList', allCheckId:'vendAllCheck', clearId:'vendClear', applyId:'vendApply', triggerTextId:'vendTriggerText', selectedSet:selectedVends, label:'TODOS VENDEDORES',    onApply:render });
+
+        // ── DADOS ─────────────────────────────────────────────
+        window.onload = fetchData;
+        function fetchData() {
+            Papa.parse(SHEET_URL, { download:true, header:true, skipEmptyLines:true,
+                complete: res => {
+                    rawData = res.data.map(row => { let n={}; for(let k in row) n[k.trim()]=row[k]; return n; });
+                    initFilters();
+                }
+            });
+        }
+        function initFilters() {
+            const canais = [...new Set(rawData.map(i=>i.Empresa||i.Em))].filter(Boolean).sort();
+            document.getElementById('canalFilter').innerHTML = '<option value="all">TODOS OS CANAIS</option>'+canais.map(c=>`<option value="${c}">${c}</option>`).join('');
+            rebuildSups();
+        }
+        function rebuildSups() {
+            const sc = document.getElementById('canalFilter').value;
+            supMS.populate([...new Set(rawData.filter(i=>sc==='all'||(i.Empresa||i.Em)===sc).map(i=>i.Supervisor))].filter(Boolean).sort());
+            selectedSups.clear(); rebuildVendors();
+        }
+        function rebuildVendors() {
+            const sc = document.getElementById('canalFilter').value;
+            vendMS.populate([...new Set(rawData.filter(i=>(sc==='all'||(i.Empresa||i.Em)===sc)&&(selectedSups.size===0||selectedSups.has(i.Supervisor))).map(i=>i.Vendedor))].filter(Boolean).sort());
+            selectedVends.clear(); render();
+        }
+
+        // ── RENDER ────────────────────────────────────────────
+        function render() {
+            const sc = document.getElementById('canalFilter').value;
+            const ss = document.getElementById('contractSearch').value.toLowerCase();
+            currentFiltered = rawData.filter(i =>
+                (sc==='all'||(i.Empresa||i.Em)===sc) &&
+                (selectedSups.size===0||selectedSups.has(i.Supervisor)) &&
+                (selectedVends.size===0||selectedVends.has(i.Vendedor)) &&
+                (!ss||String(i.Contrato).toLowerCase().includes(ss))
+            );
+            document.getElementById('rowCount').textContent = `${currentFiltered.length} CONTRATOS`;
+            let vT=0,tT=0,cT=0,dT=0,fT=0,fat=0;
+            const sb={};
+            currentFiltered.forEach(i => {
+                vT+=parseInt(i.VIRTUA)||0; tT+=parseInt(i.TV)||0;
+                cT+=parseInt(i.CHIP)||0;  dT+=parseInt(i.DCC)||0; fT+=parseInt(i.FONE)||0;
+                const val=parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
+                fat+=val; if(i.Vendedor) sb[i.Vendedor]=(sb[i.Vendedor]||0)+val;
+            });
+            document.getElementById('valVirtua').textContent = vT;
+            document.getElementById('valTV').textContent     = tT;
+            document.getElementById('valChip').textContent   = cT;
+            document.getElementById('valDCC').textContent    = dT;
+            document.getElementById('valFone').textContent   = fT;
+            document.getElementById('valFaturamento').textContent = `R$ ${fat.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+            const rc = document.getElementById('rankingContainer');
+            rc.innerHTML = '';
+            Object.entries(sb).sort((a,b)=>b[1]-a[1]).slice(0,10).forEach((item,idx) => {
+                rc.innerHTML += `<div class="rank-item"><span class="text-xs font-bold text-slate-400 w-8">#${idx+1}</span><span class="text-xs font-bold flex-1">${item[0]}</span><span class="text-xs font-black">R$ ${item[1].toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>`;
+            });
+            currentPage = 1;
+            renderPage();
+        }
+
+        document.getElementById('canalFilter').addEventListener('change', rebuildSups);
+        document.getElementById('contractSearch').addEventListener('input', render);
     </script>
 </body>
 </html>
