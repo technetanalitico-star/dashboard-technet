@@ -105,6 +105,9 @@
         #shareModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9998; align-items:flex-end; justify-content:center; }
         #shareModal.show { display:flex; }
         .share-sheet { background:#fff; border-radius:20px 20px 0 0; padding:20px 16px 28px; width:100%; max-width:480px; animation:slideSheet 0.28s ease; }
+        body.dark-mode .share-sheet { background:#1e293b; }
+        body.dark-mode .share-option-label { color:#e2e8f0; }
+        body.dark-mode .share-cancel { background:#334155; color:#94a3b8; }
         @keyframes slideSheet { from { transform:translateY(100%); } to { transform:translateY(0); } }
         .share-handle { width:36px; height:4px; background:#e2e8f0; border-radius:2px; margin:0 auto 16px; }
         .share-title { font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:12px; }
@@ -114,10 +117,12 @@
         .share-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
         .share-option-label { font-size:13px; font-weight:800; color:#1e293b; }
         .share-option-sub { font-size:10px; font-weight:600; color:#94a3b8; margin-top:1px; }
+        /* Badge de filtro ativo no share sheet */
+        .share-filter-badge { display:inline-block; background:#fff0ef; color:#EF3829; font-size:10px; font-weight:800; padding:3px 10px; border-radius:20px; margin-bottom:12px; border:1px solid #fecaca; }
         .share-cancel { width:100%; margin-top:10px; padding:13px; border-radius:12px; background:#f1f5f9; border:none; font-size:13px; font-weight:800; color:#64748b; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif; }
 
         /* EXPORT CANVAS */
-        #exportCanvas { position:fixed; left:-9999px; top:0; width:900px; background:#fff; font-family:'Plus Jakarta Sans',sans-serif; padding:32px 36px; box-sizing:border-box; z-index: -100; }
+        #exportCanvas { position:fixed; left:-9999px; top:0; width:900px; background:#fff; font-family:'Plus Jakarta Sans',sans-serif; padding:32px 36px; box-sizing:border-box; }
         #exportCanvas .exp-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; border-bottom:3px solid #EF3829; padding-bottom:14px; }
         #exportCanvas .exp-title { font-size:22px; font-weight:900; color:#0f172a; }
         #exportCanvas .exp-subtitle { font-size:10px; color:#64748b; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-top:3px; }
@@ -147,10 +152,13 @@
         <span style="color:#fff;font-weight:800;font-size:13px;" id="loadingText">Gerando relatório...</span>
     </div>
 
+    <!-- SHARE BOTTOM SHEET -->
     <div id="shareModal" onclick="if(event.target===this)this.classList.remove('show')">
         <div class="share-sheet">
             <div class="share-handle"></div>
             <div class="share-title">Compartilhar relatório</div>
+            <!-- Badge mostrando qual filtro está ativo -->
+            <div id="shareFilterBadge" class="share-filter-badge" style="display:none;"></div>
 
             <div class="share-option" onclick="shareAction('whatsapp_text')">
                 <div class="share-icon" style="background:#f0fdf4;">💬</div>
@@ -164,7 +172,7 @@
                 <div class="share-icon" style="background:#fff0ef;">🖼️</div>
                 <div>
                     <div class="share-option-label">WhatsApp — Imagem do relatório</div>
-                    <div class="share-option-sub">Gera imagem dos dados filtrados</div>
+                    <div class="share-option-sub" id="shareImageSub">Gera imagem com os dados filtrados</div>
                 </div>
             </div>
 
@@ -180,8 +188,10 @@
         </div>
     </div>
 
+    <!-- EXPORT CANVAS (fora da tela) -->
     <div id="exportCanvas"></div>
 
+    <!-- FAB -->
     <div class="fab-container">
         <button id="fabMain" class="fab-main"><i data-lucide="plus"></i></button>
         <div id="fabOptions" class="fab-options">
@@ -204,6 +214,7 @@
 
     <main class="p-4 max-w-md mx-auto space-y-5">
 
+        <!-- FILTROS -->
         <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-3">
             <div>
                 <label class="text-[9px] font-extrabold uppercase ml-1 mb-1 block text-slate-400">Canal de Venda</label>
@@ -243,6 +254,7 @@
             </div>
         </section>
 
+        <!-- KPIs -->
         <div class="grid grid-cols-2 gap-3">
             <div class="kpi-card"><div class="flex justify-between items-start mb-1"><p class="text-[10px] font-bold text-slate-400 uppercase">Virtua</p><i data-lucide="wifi" class="w-3.5 h-3.5 text-slate-300"></i></div><h2 id="valVirtua" class="text-2xl font-black text-[#EF3829]">0</h2></div>
             <div class="kpi-card"><div class="flex justify-between items-start mb-1"><p class="text-[10px] font-bold text-slate-400 uppercase">TV</p><i data-lucide="tv" class="w-3.5 h-3.5 text-slate-300"></i></div><h2 id="valTV" class="text-2xl font-black text-[#EF3829]">0</h2></div>
@@ -257,6 +269,7 @@
             </div>
         </div>
 
+        <!-- PESQUISA -->
         <div class="space-y-2">
             <div class="flex justify-between items-center px-1">
                 <label class="text-[9px] font-extrabold uppercase block text-slate-400">Pesquisar Contrato</label>
@@ -268,6 +281,7 @@
             </div>
         </div>
 
+        <!-- TABELA + PAGINAÇÃO -->
         <div class="table-responsive">
             <table>
                 <thead><tr>
@@ -279,6 +293,7 @@
             <div class="pagination" id="paginationWrap"></div>
         </div>
 
+        <!-- RANKING -->
         <div class="bg-white keep-light rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="bg-slate-50 p-4 border-b border-slate-100">
                 <h3 class="text-xs font-black uppercase flex items-center gap-2">
@@ -294,7 +309,7 @@
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMJts8HbEurDxnDxFInkRfhPjqtQ6qY7F17zVSpdXfpFwFNMKMqMRLHLcXF6DZa81wEjklVvkW8mcl/pub?output=csv';
 
         let rawData = [];
-        let currentFiltered = [];
+        let currentFiltered = [];  // ← sempre reflete os dados com os filtros aplicados
         let selectedSups  = new Set();
         let selectedVends = new Set();
         const PAGE_SIZE = 20;
@@ -303,7 +318,10 @@
         // ── FAB ───────────────────────────────────────────────
         const fabMain = document.getElementById('fabMain');
         const fabOptions = document.getElementById('fabOptions');
-        fabMain.addEventListener('click', () => { fabMain.classList.toggle('active'); fabOptions.classList.toggle('show'); });
+        fabMain.addEventListener('click', () => {
+            fabMain.classList.toggle('active');
+            fabOptions.classList.toggle('show');
+        });
 
         // ── TEMA ──────────────────────────────────────────────
         document.getElementById('themeToggle').addEventListener('click', () => {
@@ -312,20 +330,41 @@
             lucide.createIcons();
         });
 
-        // ── SHARE ─────────────────────────────────────────────
+        // ── SHARE MODAL ───────────────────────────────────────
         function openShareModal() {
-            fabMain.classList.remove('active'); fabOptions.classList.remove('show');
+            fabMain.classList.remove('active');
+            fabOptions.classList.remove('show');
+
+            // Atualiza badge do filtro ativo no modal
+            const badge = document.getElementById('shareFilterBadge');
+            const sub   = document.getElementById('shareImageSub');
+            const label = getFilterLabel();
+            if (label !== 'GERAL') {
+                badge.textContent = '🔍 ' + label;
+                badge.style.display = 'inline-block';
+                sub.textContent = `Imagem com dados de: ${label}`;
+            } else {
+                badge.style.display = 'none';
+                sub.textContent = 'Gera imagem com os dados filtrados';
+            }
+
             document.getElementById('shareModal').classList.add('show');
         }
 
-        function getResumoText() {
+        // Retorna uma string descritiva do filtro atual
+        function getFilterLabel() {
             const canal = document.getElementById('canalFilter').value;
-            let titulo = "RELATÓRIO TOTAL";
-            if (selectedVends.size === 1)      titulo = `RELATÓRIO CONSULTOR: ${[...selectedVends][0].toUpperCase()}`;
-            else if (selectedVends.size > 1)   titulo = `RELATÓRIO CONSULTORES: ${selectedVends.size} selecionados`;
-            else if (selectedSups.size === 1)  titulo = `RELATÓRIO EQUIPE: ${[...selectedSups][0].toUpperCase()}`;
-            else if (selectedSups.size > 1)    titulo = `RELATÓRIO SUPERVISORES: ${selectedSups.size} selecionados`;
-            else if (canal !== 'all')          titulo = `RELATÓRIO CANAL: ${canal.toUpperCase()}`;
+            if (selectedVends.size === 1)     return `CONSULTOR: ${[...selectedVends][0]}`;
+            if (selectedVends.size > 1)       return `${selectedVends.size} CONSULTORES`;
+            if (selectedSups.size === 1)      return `SUPERVISOR: ${[...selectedSups][0]}`;
+            if (selectedSups.size > 1)        return `${selectedSups.size} SUPERVISORES`;
+            if (canal !== 'all')              return `CANAL: ${canal}`;
+            return 'GERAL';
+        }
+
+        function getResumoText() {
+            const label = getFilterLabel();
+            const titulo = label === 'GERAL' ? 'RELATÓRIO TOTAL' : `RELATÓRIO ${label.toUpperCase()}`;
             const agora = new Date();
             return `*${titulo}*\n\n💰 *Faturamento:* ${document.getElementById('valFaturamento').innerText}\n📄 *Contratos:* ${document.getElementById('rowCount').innerText}\n\n🌐 *Virtua:* ${document.getElementById('valVirtua').innerText}\n📺 *TV:* ${document.getElementById('valTV').innerText}\n📱 *Chip:* ${document.getElementById('valChip').innerText}\n📞 *Fone:* ${document.getElementById('valFone').innerText}\n💳 *DCC:* ${document.getElementById('valDCC').innerText}\n\n_Enviado em: ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}_`;
         }
@@ -337,136 +376,177 @@
                 window.open(`https://wa.me/?text=${encodeURIComponent(getResumoText())}`, '_blank');
                 return;
             }
+
             if (type === 'copy') {
-                try { await navigator.clipboard.writeText(getResumoText()); alert('✅ Texto copiado! Cole no WhatsApp.'); }
-                catch { alert('Não foi possível copiar. Tente novamente.'); }
+                try {
+                    await navigator.clipboard.writeText(getResumoText());
+                    alert('✅ Texto copiado! Cole no WhatsApp.');
+                } catch {
+                    alert('Não foi possível copiar. Tente novamente.');
+                }
                 return;
             }
+
             if (type === 'whatsapp_image') {
-                if (!currentFiltered.length) { alert('Nenhum dado para exportar.'); return; }
-                showLoading(true, 'Gerando imagem...');
+                // ── CORREÇÃO PRINCIPAL ────────────────────────────
+                // Usa currentFiltered que já contém exatamente os dados
+                // filtrados pelo canal + supervisor + vendedor atuais.
+                // Nenhum clear() ou rebuild é chamado aqui, então os
+                // filtros estão intactos no momento da geração da imagem.
+                const dadosParaExportar = currentFiltered;
+
+                if (!dadosParaExportar.length) {
+                    alert('Nenhum dado para exportar. Verifique os filtros aplicados.');
+                    return;
+                }
+
+                showLoading(true, `Gerando imagem (${dadosParaExportar.length} contratos)...`);
+
                 try {
                     if (!window.html2canvas) {
                         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
                     }
-                    const canvas = document.getElementById('exportCanvas');
-                    
-                    // RECONSTRUÇÃO DO HTML COM DADOS FILTRADOS ATUAIS
-                    canvas.innerHTML = buildExportHTML(currentFiltered);
-                    
-                    // Espera fontes e renderização do DOM
-                    await document.fonts.ready;
-                    await new Promise(r => setTimeout(r, 500)); 
 
-                    const c = await html2canvas(canvas, { 
-                        scale: 2, 
-                        useCORS: true, 
-                        backgroundColor: '#ffffff', 
+                    const canvas = document.getElementById('exportCanvas');
+                    // Passa os dados já filtrados para buildExportHTML
+                    canvas.innerHTML = buildExportHTML(dadosParaExportar);
+                    await document.fonts.ready;
+                    await new Promise(r => setTimeout(r, 350));
+
+                    const c = await html2canvas(canvas, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
                         width: 900,
-                        logging: false
+                        windowWidth: 900
                     });
-                    
-                    canvas.innerHTML = ''; // Limpa após gerar
+                    canvas.innerHTML = '';
 
                     c.toBlob(async blob => {
                         showLoading(false);
-                        const file = new File([blob], 'relatorio_technet.png', { type:'image/png' });
+                        const file = new File([blob], 'relatorio_technet.png', { type: 'image/png' });
 
-                        if (navigator.share && navigator.canShare && navigator.canShare({ files:[file] })) {
+                        // Web Share API (mobile) — compartilha direto
+                        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                             try {
-                                await navigator.share({ files:[file], title:'TechNET — Relatório', text: getResumoText() });
+                                await navigator.share({
+                                    files: [file],
+                                    title: 'TechNET — Relatório',
+                                    text: getResumoText()
+                                });
                                 return;
-                            } catch(e) { return; }
+                            } catch (e) {
+                                // Usuário cancelou — não faz nada
+                                return;
+                            }
                         }
 
-                        // Fallback
+                        // Fallback desktop: baixa a imagem
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
-                        a.href = url; a.download = 'relatorio_technet.png'; a.click();
+                        a.href = url;
+                        a.download = `relatorio_technet_${getFilterLabel().replace(/[^a-zA-Z0-9]/g,'_').toLowerCase()}.png`;
+                        a.click();
                         setTimeout(() => URL.revokeObjectURL(url), 3000);
                         alert('📲 Imagem salva! Envie pelo WhatsApp pela galeria do seu celular.');
                     }, 'image/png');
 
-                } catch(e) {
+                } catch (e) {
                     showLoading(false);
-                    console.error(e);
-                    alert('Erro ao gerar imagem. Tente novamente.');
+                    alert('Erro ao gerar imagem: ' + e.message);
                 }
             }
         }
 
         function loadScript(src) {
-            return new Promise((res,rej) => { const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+            return new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = src; s.onload = res; s.onerror = rej;
+                document.head.appendChild(s);
+            });
         }
-        function showLoading(show, text='Gerando...') {
+
+        function showLoading(show, text = 'Gerando...') {
             document.getElementById('loadingText').textContent = text;
             document.getElementById('loadingOverlay').classList.toggle('show', show);
         }
 
         // ── EXPORT HTML ───────────────────────────────────────
+        // Recebe os dados já filtrados como parâmetro — não lê filtros aqui
         function buildExportHTML(data) {
-            const canal = document.getElementById('canalFilter').value;
-            let tag='GERAL', name='TODOS OS DADOS';
-            
-            // Lógica de Título Dinâmico na Imagem
-            if (selectedVends.size===1) { tag='CONSULTOR'; name=[...selectedVends][0]; }
-            else if (selectedVends.size>1) { tag='CONSULTORES'; name=`${selectedVends.size} selecionados`; }
-            else if (selectedSups.size===1) { tag='SUPERVISOR'; name=[...selectedSups][0]; }
-            else if (selectedSups.size>1) { tag='SUPERVISORES'; name=`${selectedSups.size} selecionados`; }
-            else if (canal!=='all') { tag='CANAL'; name=canal; }
+            // Determina o título com base nos Sets ativos no momento da chamada
+            const label = getFilterLabel();
+            const parts = label.split(': ');
+            const tag  = parts[0] || 'GERAL';
+            const name = parts[1] || label;
 
             const agora = new Date();
-            let vT=0,tT=0,cT=0,dT=0,fT=0,fat=0;
-            
-            // Calcula KPIs apenas dos dados filtrados enviados para a função
+            let vT=0, tT=0, cT=0, dT=0, fT=0, fat=0;
+
             data.forEach(i => {
-                vT+=parseInt(i.VIRTUA)||0; tT+=parseInt(i.TV)||0;
-                cT+=parseInt(i.CHIP)||0;  dT+=parseInt(i.DCC)||0; fT+=parseInt(i.FONE)||0;
-                fat+=parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
+                vT += parseInt(i.VIRTUA)||0;
+                tT += parseInt(i.TV)||0;
+                cT += parseInt(i.CHIP)||0;
+                dT += parseInt(i.DCC)||0;
+                fT += parseInt(i.FONE)||0;
+                fat += parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
             });
 
-            // Limita a tabela na imagem para não ficar gigante (opcional, aqui deixei todos os filtrados)
             const rows = data.map(i => {
-                const val = parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
+                const val  = parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
                 const prod = (i["Produto Detalhado"]||i["Produtos"]||"N/A").toUpperCase();
-                return `<tr><td class="exp-c">${i.Contrato||'-'}</td><td>${i.Empresa||i.Em||''}</td><td><strong>${i.Cliente||''}</strong></td><td>${i.Vendedor||''}</td><td class="exp-v">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td><span class="exp-b">${prod}</span></td></tr>`;
+                return `<tr>
+                    <td class="exp-c">${i.Contrato||'-'}</td>
+                    <td>${i.Empresa||i.Em||''}</td>
+                    <td><strong>${i.Cliente||''}</strong></td>
+                    <td>${i.Vendedor||''}</td>
+                    <td class="exp-v">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+                    <td><span class="exp-b">${prod}</span></td>
+                </tr>`;
             }).join('');
 
             return `
-            <div style="padding: 30px; background: white;">
-                <div class="exp-header">
-                    <div><div class="exp-title">TechNET</div><div class="exp-subtitle">Detalhamento de Vendas</div></div>
-                    <div class="exp-date"><span class="exp-tag">${tag}: ${name}</span><br>Gerado em ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+            <div class="exp-header">
+                <div>
+                    <div class="exp-title">TechNET</div>
+                    <div class="exp-subtitle">Detalhamento de Vendas</div>
                 </div>
-                <div class="exp-kpis">
-                    <div class="exp-kpi"><div class="exp-kpi-label">Virtua</div><div class="exp-kpi-val">${vT}</div></div>
-                    <div class="exp-kpi"><div class="exp-kpi-label">TV</div><div class="exp-kpi-val">${tT}</div></div>
-                    <div class="exp-kpi"><div class="exp-kpi-label">Chip</div><div class="exp-kpi-val">${cT}</div></div>
-                    <div class="exp-kpi"><div class="exp-kpi-label">Fone</div><div class="exp-kpi-val">${fT}</div></div>
-                    <div class="exp-kpi"><div class="exp-kpi-label">DCC</div><div class="exp-kpi-val">${dT}</div></div>
+                <div class="exp-date">
+                    <span class="exp-tag">${tag}: ${name}</span><br>
+                    Gerado em ${agora.toLocaleDateString('pt-BR')} às ${agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
                 </div>
-                <div class="exp-fat">
-                    <div class="exp-fat-label">Faturamento Total</div>
-                    <div class="exp-fat-val">R$ ${fat.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-                </div>
-                <table>
-                    <thead><tr><th>Contrato</th><th>Empresa</th><th>Cliente</th><th>Vendedor</th><th>Valor</th><th>Produtos</th></tr></thead>
-                    <tbody>${rows}</tbody>
-                </table>
-                <div class="exp-footer">TechNET Acompanhamento • ${agora.toLocaleDateString('pt-BR')} • ${data.length} contratos</div>
-            </div>`;
+            </div>
+            <div class="exp-kpis">
+                <div class="exp-kpi"><div class="exp-kpi-label">Virtua</div><div class="exp-kpi-val">${vT}</div></div>
+                <div class="exp-kpi"><div class="exp-kpi-label">TV</div><div class="exp-kpi-val">${tT}</div></div>
+                <div class="exp-kpi"><div class="exp-kpi-label">Chip</div><div class="exp-kpi-val">${cT}</div></div>
+                <div class="exp-kpi"><div class="exp-kpi-label">Fone</div><div class="exp-kpi-val">${fT}</div></div>
+                <div class="exp-kpi"><div class="exp-kpi-label">DCC</div><div class="exp-kpi-val">${dT}</div></div>
+            </div>
+            <div class="exp-fat">
+                <div class="exp-fat-label">Faturamento Total</div>
+                <div class="exp-fat-val">R$ ${fat.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+            </div>
+            <table>
+                <thead><tr>
+                    <th>Contrato</th><th>Empresa</th><th>Cliente</th>
+                    <th>Vendedor</th><th>Valor</th><th>Produtos</th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="exp-footer">TechNET Acompanhamento • ${agora.toLocaleDateString('pt-BR')} • ${data.length} contratos</div>`;
         }
 
         // ── PAGINAÇÃO ─────────────────────────────────────────
         function totalPages() { return Math.max(1, Math.ceil(currentFiltered.length / PAGE_SIZE)); }
 
         function renderPage() {
-            const start = (currentPage-1) * PAGE_SIZE;
+            const start = (currentPage - 1) * PAGE_SIZE;
             const pageData = currentFiltered.slice(start, start + PAGE_SIZE);
             const tbody = document.getElementById('salesTableBody');
             tbody.innerHTML = '';
             pageData.forEach(i => {
-                const val = parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
+                const val  = parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
                 const prod = (i["Produto Detalhado"]||i["Produtos"]||"N/A").toUpperCase();
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -486,9 +566,8 @@
             const tp = totalPages();
             if (tp <= 1) { wrap.innerHTML = ''; return; }
             const p = currentPage;
-
             const pages = new Set([1, tp, p, p-1, p+1].filter(x => x >= 1 && x <= tp));
-            const sorted = [...pages].sort((a,b)=>a-b);
+            const sorted = [...pages].sort((a,b) => a-b);
             let html = `<button class="pagination-btn" onclick="goPage(${p-1})" ${p===1?'disabled':''}>‹</button>`;
             let prev = null;
             sorted.forEach(n => {
@@ -511,103 +590,169 @@
 
         // ── MULTISELECT ENGINE ────────────────────────────────
         function buildMultiselect({ triggerId, dropdownId, searchId, listId, allCheckId, clearId, applyId, triggerTextId, selectedSet, onApply, label }) {
-            const trigger=document.getElementById(triggerId), dropdown=document.getElementById(dropdownId),
-                  searchEl=document.getElementById(searchId), listEl=document.getElementById(listId),
-                  allCheck=document.getElementById(allCheckId), clearBtn=document.getElementById(clearId),
-                  applyBtn=document.getElementById(applyId), textEl=document.getElementById(triggerTextId);
-            let pending=new Set();
+            const trigger  = document.getElementById(triggerId);
+            const dropdown = document.getElementById(dropdownId);
+            const searchEl = document.getElementById(searchId);
+            const listEl   = document.getElementById(listId);
+            const allCheck = document.getElementById(allCheckId);
+            const clearBtn = document.getElementById(clearId);
+            const applyBtn = document.getElementById(applyId);
+            const textEl   = document.getElementById(triggerTextId);
+            let pending = new Set();
 
-            const open=()=>{ dropdown.classList.add('open'); trigger.classList.add('open'); searchEl.value=''; filterOpts(''); pending=new Set(selectedSet); sync(); };
-            const close=()=>{ dropdown.classList.remove('open'); trigger.classList.remove('open'); };
-            trigger.addEventListener('click', e=>{ e.stopPropagation(); dropdown.classList.contains('open')?close():open(); });
-            document.addEventListener('click', e=>{ if(!trigger.closest('.multiselect-wrap').contains(e.target)) close(); });
-            searchEl.addEventListener('input', ()=>filterOpts(searchEl.value));
+            const open  = () => { dropdown.classList.add('open'); trigger.classList.add('open'); searchEl.value=''; filterOpts(''); pending=new Set(selectedSet); sync(); };
+            const close = () => { dropdown.classList.remove('open'); trigger.classList.remove('open'); };
 
-            function filterOpts(q) { listEl.querySelectorAll('.ms-option').forEach(o=>{ o.style.display=o.dataset.value.toLowerCase().includes(q.toLowerCase())?'':'none'; }); }
-            function sync() {
-                listEl.querySelectorAll('.ms-option input').forEach(cb=>{ cb.checked=pending.has(cb.value); cb.closest('.ms-option').classList.toggle('checked',cb.checked); });
-                const all=[...listEl.querySelectorAll('.ms-option')];
-                allCheck.checked=all.length>0&&all.every(o=>pending.has(o.dataset.value));
+            trigger.addEventListener('click', e => { e.stopPropagation(); dropdown.classList.contains('open') ? close() : open(); });
+            document.addEventListener('click', e => { if (!trigger.closest('.multiselect-wrap').contains(e.target)) close(); });
+            searchEl.addEventListener('input', () => filterOpts(searchEl.value));
+
+            function filterOpts(q) {
+                listEl.querySelectorAll('.ms-option').forEach(o => {
+                    o.style.display = o.dataset.value.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+                });
             }
-            allCheck.addEventListener('change', ()=>{ listEl.querySelectorAll('.ms-option').forEach(o=>allCheck.checked?pending.add(o.dataset.value):pending.delete(o.dataset.value)); sync(); });
-            listEl.addEventListener('change', e=>{ if(e.target.type!=='checkbox')return; e.target.checked?pending.add(e.target.value):pending.delete(e.target.value); sync(); });
-            clearBtn.addEventListener('click', ()=>{ pending.clear(); sync(); });
-            applyBtn.addEventListener('click', ()=>{ selectedSet.clear(); pending.forEach(v=>selectedSet.add(v)); updateText(); close(); onApply(); });
+            function sync() {
+                listEl.querySelectorAll('.ms-option input').forEach(cb => {
+                    cb.checked = pending.has(cb.value);
+                    cb.closest('.ms-option').classList.toggle('checked', cb.checked);
+                });
+                const all = [...listEl.querySelectorAll('.ms-option')];
+                allCheck.checked = all.length > 0 && all.every(o => pending.has(o.dataset.value));
+            }
+
+            allCheck.addEventListener('change', () => {
+                listEl.querySelectorAll('.ms-option').forEach(o => allCheck.checked ? pending.add(o.dataset.value) : pending.delete(o.dataset.value));
+                sync();
+            });
+            listEl.addEventListener('change', e => {
+                if (e.target.type !== 'checkbox') return;
+                e.target.checked ? pending.add(e.target.value) : pending.delete(e.target.value);
+                sync();
+            });
+            clearBtn.addEventListener('click', () => { pending.clear(); sync(); });
+            applyBtn.addEventListener('click', () => {
+                selectedSet.clear();
+                pending.forEach(v => selectedSet.add(v));
+                updateText(); close(); onApply();
+            });
 
             function updateText() {
-                const old=trigger.querySelector('.trigger-badge'); if(old)old.remove();
-                if(selectedSet.size===0) { textEl.textContent=label; }
+                const old = trigger.querySelector('.trigger-badge'); if (old) old.remove();
+                if (selectedSet.size === 0) { textEl.textContent = label; }
                 else {
-                    const b=document.createElement('span'); b.className='trigger-badge'; b.textContent=selectedSet.size;
-                    trigger.insertBefore(b,textEl);
-                    textEl.textContent=selectedSet.size===1?[...selectedSet][0]:`${selectedSet.size} selecionados`;
+                    const b = document.createElement('span'); b.className = 'trigger-badge'; b.textContent = selectedSet.size;
+                    trigger.insertBefore(b, textEl);
+                    textEl.textContent = selectedSet.size === 1 ? [...selectedSet][0] : `${selectedSet.size} selecionados`;
                 }
             }
+
             return {
-                populate(items) { listEl.innerHTML=items.map(v=>`<div class="ms-option ${selectedSet.has(v)?'checked':''}" data-value="${v}"><input type="checkbox" value="${v}" ${selectedSet.has(v)?'checked':''}><label>${v}</label></div>`).join(''); sync(); updateText(); },
+                populate(items) {
+                    listEl.innerHTML = items.map(v =>
+                        `<div class="ms-option ${selectedSet.has(v)?'checked':''}" data-value="${v}">
+                            <input type="checkbox" value="${v}" ${selectedSet.has(v)?'checked':''}>
+                            <label>${v}</label>
+                        </div>`
+                    ).join('');
+                    sync(); updateText();
+                },
                 reset() { selectedSet.clear(); updateText(); }
             };
         }
 
         const supMS  = buildMultiselect({ triggerId:'supTrigger',  dropdownId:'supDropdown',  searchId:'supSearch',  listId:'supOptionsList',  allCheckId:'supAllCheck',  clearId:'supClear',  applyId:'supApply',  triggerTextId:'supTriggerText',  selectedSet:selectedSups,  label:'TODOS SUPERVISORES', onApply:()=>{ rebuildVendors(); render(); } });
-        const vendMS = buildMultiselect({ triggerId:'vendTrigger', dropdownId:'vendDropdown', searchId:'vendSearch', listId:'vendOptionsList', allCheckId:'vendAllCheck', clearId:'vendClear', applyId:'vendApply', triggerTextId:'vendTriggerText', selectedSet:selectedVends, label:'TODOS VENDEDORES',    onApply:render });
+        const vendMS = buildMultiselect({ triggerId:'vendTrigger', dropdownId:'vendDropdown', searchId:'vendSearch', listId:'vendOptionsList', allCheckId:'vendAllCheck', clearId:'vendClear', applyId:'vendApply', triggerTextId:'vendTriggerText', selectedSet:selectedVends, label:'TODOS VENDEDORES',    onApply: render });
 
         // ── DADOS ─────────────────────────────────────────────
         window.onload = fetchData;
         function fetchData() {
-            Papa.parse(SHEET_URL, { download:true, header:true, skipEmptyLines:true,
+            Papa.parse(SHEET_URL, {
+                download: true, header: true, skipEmptyLines: true,
                 complete: res => {
-                    rawData = res.data.map(row => { let n={}; for(let k in row) n[k.trim()]=row[k]; return n; });
+                    rawData = res.data.map(row => { let n={}; for (let k in row) n[k.trim()]=row[k]; return n; });
                     initFilters();
                 }
             });
         }
+
         function initFilters() {
-            const canais = [...new Set(rawData.map(i=>i.Empresa||i.Em))].filter(Boolean).sort();
-            document.getElementById('canalFilter').innerHTML = '<option value="all">TODOS OS CANAIS</option>'+canais.map(c=>`<option value="${c}">${c}</option>`).join('');
+            const canais = [...new Set(rawData.map(i => i.Empresa||i.Em))].filter(Boolean).sort();
+            document.getElementById('canalFilter').innerHTML =
+                '<option value="all">TODOS OS CANAIS</option>' +
+                canais.map(c => `<option value="${c}">${c}</option>`).join('');
             rebuildSups();
         }
+
         function rebuildSups() {
             const sc = document.getElementById('canalFilter').value;
-            supMS.populate([...new Set(rawData.filter(i=>sc==='all'||(i.Empresa||i.Em)===sc).map(i=>i.Supervisor))].filter(Boolean).sort());
-            selectedSups.clear(); rebuildVendors();
+            // ── CORREÇÃO: não chama selectedSups.clear() aqui diretamente —
+            // o populate() do multiselect já gerencia o estado interno.
+            // O clear() só acontece quando o usuário clica em "Aplicar" no multiselect.
+            const sups = [...new Set(rawData.filter(i => sc==='all'||(i.Empresa||i.Em)===sc).map(i => i.Supervisor))].filter(Boolean).sort();
+            selectedSups.clear(); // reset ao trocar canal — comportamento esperado
+            supMS.populate(sups);
+            rebuildVendors();
         }
+
         function rebuildVendors() {
             const sc = document.getElementById('canalFilter').value;
-            vendMS.populate([...new Set(rawData.filter(i=>(sc==='all'||(i.Empresa||i.Em)===sc)&&(selectedSups.size===0||selectedSups.has(i.Supervisor))).map(i=>i.Vendedor))].filter(Boolean).sort());
-            selectedVends.clear(); render();
+            const vends = [...new Set(
+                rawData
+                    .filter(i => (sc==='all'||(i.Empresa||i.Em)===sc) && (selectedSups.size===0||selectedSups.has(i.Supervisor)))
+                    .map(i => i.Vendedor)
+            )].filter(Boolean).sort();
+            selectedVends.clear(); // reset ao trocar supervisor — comportamento esperado
+            vendMS.populate(vends);
+            render();
         }
 
         // ── RENDER ────────────────────────────────────────────
+        // Esta função popula currentFiltered com base nos filtros atuais.
+        // É sempre chamada DEPOIS que os Sets já foram atualizados pelo multiselect.
         function render() {
             const sc = document.getElementById('canalFilter').value;
             const ss = document.getElementById('contractSearch').value.toLowerCase();
+
+            // ── currentFiltered é a única fonte da verdade para os dados filtrados
             currentFiltered = rawData.filter(i =>
-                (sc==='all'||(i.Empresa||i.Em)===sc) &&
-                (selectedSups.size===0||selectedSups.has(i.Supervisor)) &&
-                (selectedVends.size===0||selectedVends.has(i.Vendedor)) &&
-                (!ss||String(i.Contrato).toLowerCase().includes(ss))
+                (sc === 'all' || (i.Empresa||i.Em) === sc) &&
+                (selectedSups.size  === 0 || selectedSups.has(i.Supervisor)) &&
+                (selectedVends.size === 0 || selectedVends.has(i.Vendedor))  &&
+                (!ss || String(i.Contrato).toLowerCase().includes(ss))
             );
+
             document.getElementById('rowCount').textContent = `${currentFiltered.length} CONTRATOS`;
-            let vT=0,tT=0,cT=0,dT=0,fT=0,fat=0;
-            const sb={};
+
+            let vT=0, tT=0, cT=0, dT=0, fT=0, fat=0;
+            const sb = {};
+
             currentFiltered.forEach(i => {
-                vT+=parseInt(i.VIRTUA)||0; tT+=parseInt(i.TV)||0;
-                cT+=parseInt(i.CHIP)||0;  dT+=parseInt(i.DCC)||0; fT+=parseInt(i.FONE)||0;
-                const val=parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
-                fat+=val; if(i.Vendedor) sb[i.Vendedor]=(sb[i.Vendedor]||0)+val;
+                vT += parseInt(i.VIRTUA)||0; tT += parseInt(i.TV)||0;
+                cT += parseInt(i.CHIP)||0;  dT += parseInt(i.DCC)||0; fT += parseInt(i.FONE)||0;
+                const val = parseFloat(String(i.Valor||0).replace('R$','').replace(/\./g,'').replace(',','.').trim())||0;
+                fat += val;
+                if (i.Vendedor) sb[i.Vendedor] = (sb[i.Vendedor]||0) + val;
             });
-            document.getElementById('valVirtua').textContent = vT;
-            document.getElementById('valTV').textContent     = tT;
-            document.getElementById('valChip').textContent   = cT;
-            document.getElementById('valDCC').textContent    = dT;
-            document.getElementById('valFone').textContent   = fT;
+
+            document.getElementById('valVirtua').textContent     = vT;
+            document.getElementById('valTV').textContent         = tT;
+            document.getElementById('valChip').textContent       = cT;
+            document.getElementById('valDCC').textContent        = dT;
+            document.getElementById('valFone').textContent       = fT;
             document.getElementById('valFaturamento').textContent = `R$ ${fat.toLocaleString('pt-BR',{minimumFractionDigits:2})}`;
+
+            // Ranking
             const rc = document.getElementById('rankingContainer');
             rc.innerHTML = '';
-            Object.entries(sb).sort((a,b)=>b[1]-a[1]).slice(0,10).forEach((item,idx) => {
-                rc.innerHTML += `<div class="rank-item"><span class="text-xs font-bold text-slate-400 w-8">#${idx+1}</span><span class="text-xs font-bold flex-1">${item[0]}</span><span class="text-xs font-black">R$ ${item[1].toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>`;
+            Object.entries(sb).sort((a,b) => b[1]-a[1]).slice(0,10).forEach((item,idx) => {
+                rc.innerHTML += `<div class="rank-item">
+                    <span class="text-xs font-bold text-slate-400 w-8">#${idx+1}</span>
+                    <span class="text-xs font-bold flex-1">${item[0]}</span>
+                    <span class="text-xs font-black">R$ ${item[1].toLocaleString('pt-BR',{minimumFractionDigits:2})}</span>
+                </div>`;
             });
+
             currentPage = 1;
             renderPage();
         }
