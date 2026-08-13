@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JMS Connect — Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-900 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-6">
+        <div class="text-center space-y-2">
+            <div class="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="shield-check" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900">JMS Connect</h2>
+            <p class="text-xs font-semibold text-slate-400">Insira suas credenciais para acessar seu painel</p>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">Usuário / Nome</label>
+                <input type="text" id="inputUser" required placeholder="Ex: DAVI DE SOUZA" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 outline-none focus:border-red-500 transition-all uppercase">
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">Senha</label>
+                <input type="password" id="inputPass" required placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-800 outline-none focus:border-red-500 transition-all">
+            </div>
+
+            <div id="loginError" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-bold text-center"></div>
+
+            <button type="submit" id="btnLoginSubmit" class="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold py-3.5 rounded-xl shadow-lg shadow-red-500/30 text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2">
+                <span>Entrar no Painel</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+        </form>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        lucide.createIcons();
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('inputUser').value.trim();
+            const password = document.getElementById('inputPass').value.trim();
+            const btnSubmit = document.getElementById('btnLoginSubmit');
+            const errorDiv = document.getElementById('loginError');
+
+            errorDiv.classList.add('hidden');
+            btnSubmit.disabled = true;
+
+            try {
+                const result = await loginApi(username, password);
+
+                if (result.success) {
+                    sessionStorage.setItem('userData', JSON.stringify(result));
+
+                    // Redirecionamento por Perfil
+                    const perfil = result.user.perfil;
+                    if (perfil === 'ADMIN') {
+                        window.location.href = 'admin.html';
+                    } else if (perfil === 'SUPERVISOR') {
+                        window.location.href = 'supervisor.html';
+                    } else {
+                        window.location.href = 'vendedor.html';
+                    }
+                } else {
+                    errorDiv.textContent = result.message || 'Usuário ou senha inválidos.';
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Erro ao se conectar com o servidor.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                btnSubmit.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

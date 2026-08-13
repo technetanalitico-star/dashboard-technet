@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.tab-btn.active {
+    color: #ef4444;
+    font-weight: 800;
+}
+
+.pill-active {
+    background-color: #ef4444;
+    color: #ffffff;
+}
+
+::-webkit-scrollbar { 
+    display: none; 
+}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painel do Vendedor — JMS Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-slate-100 min-h-screen antialiased pb-24">
+
+    <!-- HEADER -->
+    <header class="bg-white px-4 pt-4 pb-3 sticky top-0 z-40 border-b border-slate-100 shadow-sm">
+        <div class="flex justify-between items-center max-w-md mx-auto">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-red-50 text-red-600 rounded-xl">
+                    <i data-lucide="user-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-black tracking-tight leading-none text-slate-900" id="usrName">VENDEDOR</h1>
+                    <p class="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-wider">VENDEDOR</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="p-2 bg-slate-100 rounded-xl text-slate-600 hover:text-red-600 transition-colors" title="Sair">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <!-- FILTRO DE FILIAIS -->
+        <div class="flex items-center gap-2 overflow-x-auto mt-3 pb-1 no-scrollbar max-w-md mx-auto">
+            <button onclick="filterBranch('TODOS')" class="pill-btn pill-active text-xs font-bold px-4 py-1.5 rounded-full whitespace-nowrap transition-all">TODOS</button>
+            <button onclick="filterBranch('VNA')" class="pill-btn bg-slate-100 text-slate-600 text-xs font-bold px-4 py-1.5 rounded-full whitespace-nowrap transition-all">VNA</button>
+            <button onclick="filterBranch('RDT')" class="pill-btn bg-slate-100 text-slate-600 text-xs font-bold px-4 py-1.5 rounded-full whitespace-nowrap transition-all">RDT</button>
+        </div>
+    </header>
+
+    <main class="p-4 max-w-md mx-auto space-y-4">
+        <!-- ABA DASHBOARD -->
+        <div id="viewDashboard" class="space-y-4">
+            <!-- CARDS DE PRODUTOS -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase">Virtua / Banda</p>
+                        <h3 id="valVirtua" class="text-2xl font-black text-slate-800 mt-0.5">0</h3>
+                    </div>
+                    <div class="p-2.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="wifi" class="w-5 h-5"></i></div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase">Móvel / Chip</p>
+                        <h3 id="valMovel" class="text-2xl font-black text-slate-800 mt-0.5">0</h3>
+                    </div>
+                    <div class="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><i data-lucide="smartphone" class="w-5 h-5"></i></div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase">TV</p>
+                        <h3 id="valTV" class="text-2xl font-black text-slate-800 mt-0.5">0</h3>
+                    </div>
+                    <div class="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="tv" class="w-5 h-5"></i></div>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between">
+                    <div>
+                        <p class="text-[11px] font-bold text-slate-400 uppercase">Fone Fixo</p>
+                        <h3 id="valFone" class="text-2xl font-black text-slate-800 mt-0.5">0</h3>
+                    </div>
+                    <div class="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="phone" class="w-5 h-5"></i></div>
+                </div>
+            </div>
+
+            <!-- CARDS TOTALIZADORES -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-3.5 rounded-2xl border-l-4 border-emerald-500 shadow-sm">
+                    <p class="text-[10px] font-extrabold uppercase text-slate-400">Minhas Vendas</p>
+                    <h3 id="valTotalContratos" class="text-2xl font-black text-slate-800">0</h3>
+                    <p class="text-[9px] font-semibold text-slate-400 mt-1">Registradas</p>
+                </div>
+
+                <div class="bg-white p-3.5 rounded-2xl border-l-4 border-blue-500 shadow-sm">
+                    <p class="text-[10px] font-extrabold uppercase text-slate-400">Via Solar</p>
+                    <h3 id="valSolarCount" class="text-2xl font-black text-slate-800">0</h3>
+                    <p class="text-[9px] font-semibold text-slate-400 mt-1">Geradas pelo Solar</p>
+                </div>
+            </div>
+
+            <!-- RECEITA -->
+            <div class="bg-slate-900 p-5 rounded-2xl text-white space-y-3 relative overflow-hidden shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Receita Produzida</p>
+                        <h2 id="valReceita" class="text-3xl font-black mt-0.5">R$ 0,00</h2>
+                    </div>
+                    <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/30">Acumulado</span>
+                </div>
+            </div>
+
+            <!-- RANKING / DESEMPENHO -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-black uppercase text-slate-800 flex items-center gap-2">
+                        <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> Desempenho
+                    </h3>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Por Volume</span>
+                </div>
+                <div id="rankingContainer" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- ABA LISTA DE VENDAS -->
+        <div id="viewVendas" class="space-y-3 hidden">
+            <div class="relative">
+                <input type="text" id="searchVendas" oninput="renderVendasList()" placeholder="Buscar cliente, CPF ou nº Solar..." class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-red-500">
+                <i data-lucide="search" class="w-4 h-4 absolute right-3 top-3 text-slate-400"></i>
+            </div>
+            <div id="vendasCardList" class="space-y-3"></div>
+        </div>
+    </main>
+
+    <!-- TAB BAR INFERIOR -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-2 px-6 z-50">
+        <div class="max-w-md mx-auto flex justify-between items-center relative">
+            <button onclick="switchTab('dashboard')" id="btnTabDashboard" class="tab-btn active flex flex-col items-center gap-1 text-slate-400">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                <span class="text-[10px]">Dashboard</span>
+            </button>
+            <button onclick="switchTab('vendas')" id="btnTabVendas" class="tab-btn flex flex-col items-center gap-1 text-slate-400">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                <span class="text-[10px]">Vendas</span>
+            </button>
+            <button class="w-12 h-12 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/40 -mt-6 active:scale-95 transition-transform">
+                <i data-lucide="plus" class="w-6 h-6"></i>
+            </button>
+            <button onclick="logout()" class="tab-btn flex flex-col items-center gap-1 text-slate-400">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                <span class="text-[10px]">Sair</span>
+            </button>
+        </div>
+    </nav>
+
+    <script src="js/data.js"></script>
+    <script src="js/vendedor.js"></script>
+</body>
+</html>
