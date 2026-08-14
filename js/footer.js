@@ -18,9 +18,10 @@ function renderFooter() {
                     <span class="text-[10px]">Vendas</span>
                 </button>
                 
-                <button class="w-12 h-12 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/40 -mt-6 active:scale-95 transition-transform">
-                    <i data-lucide="plus" class="w-6 h-6"></i>
-                </button>
+                                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSfeTVXXRoAuOH9LZbbtv43JrrVHCh9tv_Cippoz6ZtlirhFnw/viewform" target="_blank" class="w-12 h-12 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/40 -mt-6 active:scale-95 transition-transform relative -left-3 -down-1">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                    </a>
+                
 
                 <button onclick="switchTab('metas')" id="btnTabMetas" class="tab-btn flex flex-col items-center gap-1 text-slate-400">
                     <i data-lucide="trophy" class="w-5 h-5"></i>
