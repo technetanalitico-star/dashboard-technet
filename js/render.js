@@ -66,14 +66,11 @@ function renderRanking(sellerCounts) {
 
 function renderVendasList() {
     const data = getFilteredData();
-    const search = (document.getElementById('searchVendas').value || '').toLowerCase();
+    const search = (document.getElementById('searchVendas')?.value || '').toLowerCase();
     const container = document.getElementById('vendasCardList');
     container.innerHTML = '';
 
-    const filtered = data.filter(i => {
-        const txt = `${i.cliente} ${i.vendedor} ${i.cpf} ${i.numSolar} ${i.cidade}`.toLowerCase();
-        return txt.includes(search);
-    });
+    const filtered = data.filter(i => `${i.cliente} ${i.vendedor} ${i.lider} ${i.cpf} ${i.numSolar} ${i.cidade}`.toLowerCase().includes(search));
 
     if (filtered.length === 0) {
         container.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-xs font-bold text-slate-400">Nenhuma venda encontrada.</div>`;
@@ -86,10 +83,12 @@ function renderVendasList() {
         if (i.tv) prods.push('TV');
         if (i.chip) prods.push('MÓVEL');
         if (i.fone) prods.push('FONE');
-        const tagProd = prods.join(' + ') || 'VENDA';
+
+        // Formatação do Timestamp (Data de Cadastro)
+        const dataCadastro = i.timestamp ? new Date(i.timestamp).toLocaleString('pt-BR') : 'Data N/I';
 
         container.innerHTML += `
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2.5">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
                 <div class="flex justify-between items-start gap-2">
                     <div>
                         <h4 class="font-black text-sm text-slate-900 leading-tight">${i.cliente}</h4>
@@ -98,22 +97,17 @@ function renderVendasList() {
                             ${i.cpf ? `• CPF: <span class="text-slate-700">${i.cpf}</span>` : ''}
                         </p>
                     </div>
-                    <span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-1 rounded-lg shrink-0">${tagProd}</span>
+                    <span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-1 rounded-lg shrink-0">${prods.join(' + ') || 'VENDA'}</span>
                 </div>
+
+                <!-- DATA DE CADASTRO -->
+                <p class="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
+                    <i data-lucide="calendar" class="w-3 h-3"></i> Cadastrado em: <strong class="text-slate-600">${dataCadastro}</strong>
+                </p>
 
                 <div class="flex items-center justify-between text-[11px] font-semibold bg-slate-50 p-2 rounded-xl text-slate-600">
-                    <div class="flex items-center gap-1">
-                        <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
-                        <span>Vend: <strong class="text-slate-800">${i.vendedor}</strong></span>
-                    </div>
+                    <span>Vend: <strong class="text-slate-800">${i.vendedor}</strong> (Líder: ${i.lider})</span>
                     <span class="font-black text-slate-900">${i.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                </div>
-
-                <div class="flex justify-between items-center text-[10px] text-slate-400 pt-0.5">
-                    <span class="flex items-center gap-1">
-                        <i data-lucide="map-pin" class="w-3 h-3"></i> ${i.cidade || 'CIDADE N/I'} ${i.bairro ? `(${i.bairro})` : ''}
-                    </span>
-                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold uppercase">${i.empresa}</span>
                 </div>
             </div>
         `;

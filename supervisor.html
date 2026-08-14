@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Painel da Supervisão — JMS Connect</title>
+    <title>Painel da Supervisão — TECNET</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="css/styles.css">
@@ -119,30 +119,47 @@
             </div>
             <div id="vendasCardList" class="space-y-3"></div>
         </div>
+        <!-- ABA METAS -->
+<div id="viewMetas" class="space-y-4 hidden">
+    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+        <h3 class="font-black text-sm text-slate-900 flex items-center gap-2">
+            <i data-lucide="trophy" class="w-4 h-4 text-red-600"></i> Progresso das Metas
+        </h3>
+
+        <!-- Card Meta Diária -->
+        <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold">
+                <span class="text-slate-500">Meta do Dia</span>
+                <span id="txtMetaDia" class="text-slate-900">0 / 0</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                <div id="barMetaDia" class="bg-red-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="pctMetaDia" class="text-[10px] text-right text-slate-400 font-bold">0% atingido</p>
+        </div>
+
+        <!-- Card Meta Mensal -->
+        <div class="space-y-1">
+            <div class="flex justify-between text-xs font-bold">
+                <span class="text-slate-500">Meta do Mês</span>
+                <span id="txtMetaMes" class="text-slate-900">0 / 0</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                <div id="barMetaMes" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <p id="pctMetaMes" class="text-[10px] text-right text-slate-400 font-bold">0% atingido</p>
+        </div>
+    </div>
+</div>
     </main>
 
     <!-- TAB BAR INFERIOR -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-2 px-6 z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center relative">
-            <button onclick="switchTab('dashboard')" id="btnTabDashboard" class="tab-btn active flex flex-col items-center gap-1 text-slate-400">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i>
-                <span class="text-[10px]">Dashboard</span>
-            </button>
-            <button onclick="switchTab('vendas')" id="btnTabVendas" class="tab-btn flex flex-col items-center gap-1 text-slate-400">
-                <i data-lucide="file-text" class="w-5 h-5"></i>
-                <span class="text-[10px]">Vendas</span>
-            </button>
-            <button class="w-12 h-12 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/40 -mt-6 active:scale-95 transition-transform">
-                <i data-lucide="plus" class="w-6 h-6"></i>
-            </button>
-            <button onclick="logout()" class="tab-btn flex flex-col items-center gap-1 text-slate-400">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-                <span class="text-[10px]">Sair</span>
-            </button>
-        </div>
-    </nav>
+    <!-- Container do Rodapé Centralizado -->
+    <div id="footer-container"></div>
 
+    <!-- Scripts -->
     <script src="js/data.js"></script>
+    <script src="js/footer.js"></script> <!-- NOVO -->
     <script src="js/supervisor.js"></script>
 </body>
 </html>

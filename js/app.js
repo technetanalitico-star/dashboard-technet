@@ -61,20 +61,33 @@ function logout() {
 function switchTab(tab) {
     const dash = document.getElementById('viewDashboard');
     const vend = document.getElementById('viewVendas');
+    const metas = document.getElementById('viewMetas');
+
     const btnDash = document.getElementById('btnTabDashboard');
     const btnVend = document.getElementById('btnTabVendas');
+    const btnMetas = document.getElementById('btnTabMetas');
+
+    // Oculta todas
+    dash?.classList.add('hidden');
+    vend?.classList.add('hidden');
+    metas?.classList.add('hidden');
+
+    btnDash?.classList.remove('active');
+    btnVend?.classList.remove('active');
+    btnMetas?.classList.remove('active');
 
     if (tab === 'dashboard') {
-        dash.classList.remove('hidden');
-        vend.classList.add('hidden');
-        btnDash.classList.add('active');
-        btnVend.classList.remove('active');
-    } else {
-        dash.classList.add('hidden');
-        vend.classList.remove('hidden');
-        btnDash.classList.remove('active');
-        btnVend.classList.add('active');
+        dash?.classList.remove('hidden');
+        btnDash?.classList.add('active');
+    } else if (tab === 'vendas') {
+        vend?.classList.remove('hidden');
+        btnVend?.classList.add('active');
+    } else if (tab === 'metas') {
+        metas?.classList.remove('hidden');
+        btnMetas?.classList.add('active');
+        renderMetas(); // Carrega os cálculos das metas
     }
+    lucide.createIcons();
 }
 
 function filterBranch(branch) {
