@@ -1,37 +1,57 @@
-function renderAll() {
-    const data = getFilteredData();
 
-    let virtuaCount = 0, movelCount = 0, tvCount = 0, foneCount = 0;
-    let totalReceita = 0, solarCount = 0;
+export function renderAll(data = [], callbacks = {}) {
+    let virtua = 0, movel = 0, tv = 0, fone = 0, solar = 0, receita = 0;
     const sellerCounts = {};
 
     data.forEach(i => {
-        if (i.virtua) virtuaCount++;
-        if (i.chip) movelCount++;
-        if (i.tv) tvCount++;
-        if (i.fone) foneCount++;
+        if (i.virtua) virtua++;
+        if (i.chip) movel++;
+        if (i.tv) tv++;
+        if (i.fone) fone++;
+        
+        // Trata a coluna Solar
+        const valorSolar = String(i.solar || '').trim().toUpperCase();
+        if (valorSolar === 'SIM' || valorSolar === 'S' || i.solar === true) {
+            solar++;
+        }
 
-        if (i.solar.toUpperCase() === 'SIM') solarCount++;
-        totalReceita += i.valor;
+        // Soma a receita
+        receita += (Number(i.valor) || 0);
 
+        // Agrupa vendedores
         if (i.vendedor) {
-            sellerCounts[i.vendedor] = (sellerCounts[i.vendedor] || 0) + 1;
+            const nomeVendedor = String(i.vendedor).trim().toUpperCase();
+            sellerCounts[nomeVendedor] = (sellerCounts[nomeVendedor] || 0) + 1;
         }
     });
 
-    document.getElementById('valVirtua').textContent = virtuaCount;
-    document.getElementById('valMovel').textContent = movelCount;
-    document.getElementById('valTV').textContent = tvCount;
-    document.getElementById('valFone').textContent = foneCount;
+    // Função utilitária interna para atualizar texto se o elemento existir na tela
+    const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+    };
 
-    document.getElementById('valTotalContratos').textContent = data.length;
-    document.getElementById('valSolarCount').textContent = solarCount;
-    document.getElementById('valReceita').textContent = totalReceita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    // Atualiza os elementos da tela
+    setTxt('valVirtua', virtua);
+    setTxt('valMovel', movel);
+    setTxt('valTV', tv);
+    setTxt('valFone', fone);
+    setTxt('valTotalContratos', data.length);
+    setTxt('valSolarCount', solar);
+    
+    const elReceita = document.getElementById('valReceita');
+    if (elReceita) {
+        elReceita.textContent = receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
 
-    renderRanking(sellerCounts);
-    renderVendasList();
+    // Executa os callbacks adicionais se foram passados
+    if (typeof callbacks.renderMetas === 'function') callbacks.renderMetas(data);
+    if (typeof callbacks.renderRanking === 'function') callbacks.renderRanking(sellerCounts);
+    if (typeof callbacks.renderVendasList === 'function') callbacks.renderVendasList(data);
+
+    // Atualiza ícones do Lucide
+    if (window.lucide) lucide.createIcons();
 }
-
 function renderRanking(sellerCounts) {
     const topSellersContainer = document.getElementById('topSellersContainer');
     topSellersContainer.innerHTML = '';

@@ -92,8 +92,10 @@ function switchTab(tab) {
 
 function filterBranch(branch) {
     currentBranch = branch;
+
+    // Estiliza o botão ativo
     document.querySelectorAll('.pill-btn').forEach(btn => {
-        if (btn.textContent.toUpperCase().includes(branch)) {
+        if (btn.textContent.trim() === branch) {
             btn.classList.add('pill-active');
             btn.classList.remove('bg-slate-100', 'text-slate-600');
         } else {
@@ -101,5 +103,7 @@ function filterBranch(branch) {
             btn.classList.add('bg-slate-100', 'text-slate-600');
         }
     });
+
+    // Recalcula tudo (Dashboard, Lista de Vendas e Metas) com base na nova filial
     renderAll();
 }

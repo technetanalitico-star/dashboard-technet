@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     rawSales = session.sales.map(parseRow);
     renderAll();
 });
-
 function getFilteredData() {
     return rawSales.filter(i => {
         if (currentBranch === 'TODOS') return true;
@@ -20,7 +19,9 @@ function getFilteredData() {
 }
 
 function renderAll() {
+    // Puxa as vendas já filtradas pela filial ativa (TODOS, VNA ou RDT)
     const data = getFilteredData();
+    
     let virtua = 0, movel = 0, tv = 0, fone = 0, solar = 0, receita = 0;
     const sellerCounts = {};
 
@@ -29,27 +30,42 @@ function renderAll() {
         if (i.chip) movel++;
         if (i.tv) tv++;
         if (i.fone) fone++;
-        if (i.solar.toUpperCase() === 'SIM') solar++;
-        receita += i.valor;
+        
+        // Checagem segura do Solar (evita erro de toUpperCase em valores nulos/undefined)
+        const valorSolar = String(i.solar || '').trim().toUpperCase();
+        if (valorSolar === 'SIM' || valorSolar === 'S' || i.solar === true) {
+            solar++;
+        }
 
+        // Soma da receita tratando conversão de números
+        receita += (Number(i.valor) || 0);
+
+        // Agrupamento por Vendedor para o Ranking
         if (i.vendedor) {
-            sellerCounts[i.vendedor] = (sellerCounts[i.vendedor] || 0) + 1;
+            const nomeVendedor = String(i.vendedor).trim().toUpperCase();
+            sellerCounts[nomeVendedor] = (sellerCounts[nomeVendedor] || 0) + 1;
         }
     });
 
-    document.getElementById('valVirtua').textContent = virtua;
-    document.getElementById('valMovel').textContent = movel;
-    document.getElementById('valTV').textContent = tv;
-    document.getElementById('valFone').textContent = fone;
-    document.getElementById('valTotalContratos').textContent = data.length;
-    document.getElementById('valSolarCount').textContent = solar;
-    document.getElementById('valReceita').textContent = receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    // Atualização dos Cards da Dashboard
+    if (document.getElementById('valVirtua')) document.getElementById('valVirtua').textContent = virtua;
+    if (document.getElementById('valMovel')) document.getElementById('valMovel').textContent = movel;
+    if (document.getElementById('valTV')) document.getElementById('valTV').textContent = tv;
+    if (document.getElementById('valFone')) document.getElementById('valFone').textContent = fone;
+    if (document.getElementById('valTotalContratos')) document.getElementById('valTotalContratos').textContent = data.length;
+    if (document.getElementById('valSolarCount')) document.getElementById('valSolarCount').textContent = solar;
+    if (document.getElementById('valReceita')) {
+        document.getElementById('valReceita').textContent = receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
 
-    renderRanking(sellerCounts);
-    renderVendasList();
-    lucide.createIcons();
+    // Renderiza as outras seções com base na filial selecionada
+    if (typeof renderMetas === 'function') renderMetas();
+    if (typeof renderRanking === 'function') renderRanking(sellerCounts);
+    if (typeof renderVendasList === 'function') renderVendasList();
+
+    // Atualiza os ícones do Lucide
+    if (window.lucide) lucide.createIcons();
 }
-
 function renderRanking(sellerCounts) {
     const container = document.getElementById('rankingContainer');
     container.innerHTML = '';
@@ -83,7 +99,7 @@ function renderRanking(sellerCounts) {
     });
 }
 
-function renderVendasList() {
+ function renderVendasList() {
     const data = getFilteredData();
     const search = (document.getElementById('searchVendas')?.value || '').toLowerCase();
     const container = document.getElementById('vendasCardList');
@@ -134,7 +150,9 @@ function renderVendasList() {
     lucide.createIcons();
 }
 function renderMetas() {
-    const data = getFilteredData();
+    // IMPORTANTE: Usa apenas as vendas da filial filtrada!
+    const data = getFilteredData(); 
+
     const hoje = new Date();
     const diaHoje = hoje.getDate();
     const mesHoje = hoje.getMonth();
@@ -143,12 +161,10 @@ function renderMetas() {
     let realizadoDia = 0;
     let realizadoMes = 0;
 
-    // 1. Calcula o acumulado de vendas do dia e do mês atual
     data.forEach(i => {
         if (!i.timestamp) return;
 
         let dt = new Date(i.timestamp);
-        // Trata formato de data brasileira (DD/MM/YYYY)
         if (isNaN(dt.getTime()) && typeof i.timestamp === 'string') {
             const partes = i.timestamp.split(' ')[0].split('/');
             if (partes.length === 3) {
@@ -166,32 +182,29 @@ function renderMetas() {
         }
     });
 
-    // 2. Obtém os alvos (metas) vindos da API/Sessão ou define um padrão
+    // Busca das metas do perfil
     const metasConfig = session?.metas || {
-        diariaVendedor: 5,     // Meta diária padrão
-        mensalVendedor: 100,   // Meta mensal padrão
-        diariaSupervisor: 20,
-        mensalSupervisor: 400,
-        diariaGeral: 50,
-        mensalGeral: 1000
+        diariaVendedor: 5, mensalVendedor: 100,
+        diariaSupervisor: 20, mensalSupervisor: 400,
+        diariaGeral: 50, mensalGeral: 1000
     };
 
-    let targetDia = metasConfig.diariaVendedor;
-    let targetMes = metasConfig.mensalVendedor;
+    let targetDia = metasConfig.diariaGeral;
+    let targetMes = metasConfig.mensalGeral;
 
-    if (session?.user?.perfil === 'SUPERVISOR') {
+    if (session?.user?.perfil === 'VENDEDOR') {
+        targetDia = metasConfig.diariaVendedor;
+        targetMes = metasConfig.mensalVendedor;
+    } else if (session?.user?.perfil === 'SUPERVISOR') {
         targetDia = metasConfig.diariaSupervisor;
         targetMes = metasConfig.mensalSupervisor;
-    } else if (session?.user?.perfil === 'ADMIN' || session?.user?.perfil === 'GERAL') {
-        targetDia = metasConfig.diariaGeral;
-        targetMes = metasConfig.mensalGeral;
     }
 
-    // 3. Calcula as porcentagens de atingimento
+    // Porcentagens
     const pctDia = targetDia > 0 ? Math.min(Math.round((realizadoDia / targetDia) * 100), 100) : 0;
     const pctMes = targetMes > 0 ? Math.min(Math.round((realizadoMes / targetMes) * 100), 100) : 0;
 
-    // 4. Atualiza os valores nos elementos da tela
+    // Atualiza os textos na tela
     const elTxtDia = document.getElementById('txtMetaDia');
     const elBarDia = document.getElementById('barMetaDia');
     const elPctDia = document.getElementById('pctMetaDia');
@@ -208,10 +221,12 @@ function renderMetas() {
     if (elBarMes) elBarMes.style.width = `${pctMes}%`;
     if (elPctMes) elPctMes.textContent = `${pctMes}% atingido`;
 }
-function filterBranch(branch) {
+ function filterBranch(branch) {
     currentBranch = branch;
+
+    // Estiliza o botão ativo
     document.querySelectorAll('.pill-btn').forEach(btn => {
-        if (btn.textContent.includes(branch)) {
+        if (btn.textContent.trim() === branch) {
             btn.classList.add('pill-active');
             btn.classList.remove('bg-slate-100', 'text-slate-600');
         } else {
@@ -219,10 +234,11 @@ function filterBranch(branch) {
             btn.classList.add('bg-slate-100', 'text-slate-600');
         }
     });
+
+    // Recalcula tudo (Dashboard, Lista de Vendas e Metas) com base na nova filial
     renderAll();
 }
-
-function switchTab(tab) {
+ function switchTab(tab) {
     const dash = document.getElementById('viewDashboard');
     const vend = document.getElementById('viewVendas');
     const metas = document.getElementById('viewMetas');

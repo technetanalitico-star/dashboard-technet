@@ -1,17 +1,3 @@
-let session = JSON.parse(sessionStorage.getItem('userData'));
-let currentBranch = 'TODOS';
-let rawSales = [];
-
-if (!session || session.user.perfil !== 'VENDEDOR') {
-    window.location.href = 'index.html';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('usrName').textContent = session.user.username;
-    rawSales = session.sales.map(parseRow);
-    renderAll();
-});
-
 function getFilteredData() {
     return rawSales.filter(i => {
         if (currentBranch === 'TODOS') return true;
@@ -67,31 +53,40 @@ function renderAll() {
     // Atualiza os ícones do Lucide
     if (window.lucide) lucide.createIcons();
 }
-
-function renderRanking(totalVendas) {
+function renderRanking(sellerCounts) {
     const container = document.getElementById('rankingContainer');
-    const name = session.user.username;
-    
-    container.innerHTML = `
-        <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3 flex-1">
-                <span class="w-6 h-6 rounded-lg bg-slate-900 text-white font-black text-xs flex items-center justify-center">1</span>
-                <div class="flex-1">
-                    <p class="text-xs font-black text-slate-800">${name}</p>
-                    <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1">
-                        <div class="bg-red-500 h-1.5 rounded-full" style="width: 100%"></div>
+    container.innerHTML = '';
+
+    const sorted = Object.entries(sellerCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const maxVal = sorted[0]?.[1] || 1;
+
+    if (sorted.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">Sem vendas no período.</p>`;
+        return;
+    }
+
+    sorted.forEach(([vendedor, count], idx) => {
+        container.innerHTML += `
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 flex-1">
+                    <span class="w-6 h-6 rounded-lg bg-slate-900 text-white font-black text-xs flex items-center justify-center">${idx + 1}</span>
+                    <div class="flex-1">
+                        <p class="text-xs font-black text-slate-800">${vendedor}</p>
+                        <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1">
+                            <div class="bg-red-500 h-1.5 rounded-full" style="width: ${(count / maxVal) * 100}%"></div>
+                        </div>
                     </div>
                 </div>
+                <div class="text-right">
+                    <span class="text-xs font-black text-slate-900">${count}</span>
+                    <p class="text-[8px] font-bold text-slate-400">VENDAS</p>
+                </div>
             </div>
-            <div class="text-right">
-                <span class="text-xs font-black text-slate-900">${totalVendas}</span>
-                <p class="text-[8px] font-bold text-slate-400">VENDAS</p>
-            </div>
-        </div>
-    `;
+        `;
+    });
 }
 
-function renderVendasList() {
+ function renderVendasList() {
     const data = getFilteredData();
     const search = (document.getElementById('searchVendas')?.value || '').toLowerCase();
     const container = document.getElementById('vendasCardList');
@@ -140,24 +135,6 @@ function renderVendasList() {
         `;
     });
     lucide.createIcons();
-}
-
-function filterBranch(branch) {
-    currentBranch = branch;
-
-    // Estiliza o botão ativo
-    document.querySelectorAll('.pill-btn').forEach(btn => {
-        if (btn.textContent.trim() === branch) {
-            btn.classList.add('pill-active');
-            btn.classList.remove('bg-slate-100', 'text-slate-600');
-        } else {
-            btn.classList.remove('pill-active');
-            btn.classList.add('bg-slate-100', 'text-slate-600');
-        }
-    });
-
-    // Recalcula tudo (Dashboard, Lista de Vendas e Metas) com base na nova filial
-    renderAll();
 }
 function renderMetas() {
     // IMPORTANTE: Usa apenas as vendas da filial filtrada!
@@ -231,7 +208,24 @@ function renderMetas() {
     if (elBarMes) elBarMes.style.width = `${pctMes}%`;
     if (elPctMes) elPctMes.textContent = `${pctMes}% atingido`;
 }
-function switchTab(tab) {
+ function filterBranch(branch) {
+    currentBranch = branch;
+
+    // Estiliza o botão ativo
+    document.querySelectorAll('.pill-btn').forEach(btn => {
+        if (btn.textContent.trim() === branch) {
+            btn.classList.add('pill-active');
+            btn.classList.remove('bg-slate-100', 'text-slate-600');
+        } else {
+            btn.classList.remove('pill-active');
+            btn.classList.add('bg-slate-100', 'text-slate-600');
+        }
+    });
+
+    // Recalcula tudo (Dashboard, Lista de Vendas e Metas) com base na nova filial
+    renderAll();
+}
+ function switchTab(tab) {
     const dash = document.getElementById('viewDashboard');
     const vend = document.getElementById('viewVendas');
     const metas = document.getElementById('viewMetas');

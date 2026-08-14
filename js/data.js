@@ -33,7 +33,7 @@ function parseRow(row) {
         empresa: (cleanRow['Qual empresa?'] || 'GERAL').toUpperCase(),
         lider: lider || 'NÃO INFORMADO',
         vendedor: vendedor || 'NÃO INFORMADO',
-        solar: cleanRow['GERADO PELO SOLAR?'] || '',
+        solar: cleanRow['GERADO NO SOLAR?'] || '',
         numSolar: cleanRow['NÚMERO DO SOLAR'] || '-',
         cliente: cleanRow['NOME COMPLETO'] || 'CLIENTE NÃO INFORMADO',
         cpf: cleanRow['CPF/CNPJ'] || '',
