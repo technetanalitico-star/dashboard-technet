@@ -7,6 +7,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .status-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid #f1f5f9;
+            border-left-width: 4px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen antialiased pb-24">
 
@@ -99,6 +118,31 @@
                 </div>
             </div>
 
+
+
+
+
+            
+            <!-- ================================================================= -->
+        <!-- NOVO: CONTAINER DOS CARDS DINÂMICOS DE STATUS (ACIMA DO FATURAMENTO) -->
+        <!-- ================================================================= -->
+        <div id="status-cards-container" class="status-grid">
+            <!-- Os cards serão inseridos dinamicamente aqui via JS -->
+        </div>
+        <!-- ================================================================= -->
+
+        </div>
+
+
+
+
+
+
+
+
+
+
+
             <!-- RANKING / DESEMPENHO -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                 <div class="flex justify-between items-center mb-3">
@@ -163,5 +207,9 @@
     <script src="js/render.js"></script>
 
     <script src="js/vendedor.js"></script>
+    <script src="js/status_das_vendas.js"></script>
+    
+
+
 </body>
 </html>

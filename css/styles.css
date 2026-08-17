@@ -19,4 +19,69 @@ body {
 
 ::-webkit-scrollbar { 
     display: none; 
+    .status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px; /* Garante o espaçamento acima do Faturamento Global */
+}
+
+
+.status-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #6b7280; /* Borda de destaque na esquerda */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.status-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.status-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.status-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-count {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1;
+  margin: 8px 0 16px 0;
+}
+
+.status-divider {
+  height: 1px;
+  background-color: #f3f4f6;
+  margin-bottom: 8px;
+  margin-top: auto;
+}
+
+.status-subtext {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
 }
