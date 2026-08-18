@@ -40,6 +40,7 @@ function parseRow(row) {
         cidade: cleanRow['CIDADE'] || '',
         bairro: cleanRow['BAIRRO'] || '',
         tv: cleanRow['TV'] || '',
+        contratoSolar: row['CONTRATO DO SOLAR'] || row.CONTRATO_SOLAR || row.contratoSolar || row.CONTRATO || '',
         virtua: cleanRow['VIRTUA'] || '',
         fone: cleanRow['FONE'] || '',
         chip: cleanRow['CHIP'] || '',

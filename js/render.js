@@ -129,9 +129,7 @@ function renderAll() {
         document.getElementById('valReceita').textContent = receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // =========================================================
-    // >>> ADICIONE APENAS ESTA LINHA AQUI DAQUI EM DIANTE <<<
-    // =========================================================
+ 
     renderStatusCards(data); 
 
     if (typeof renderMetas === 'function') renderMetas();
@@ -201,20 +199,36 @@ function renderVendasList() {
         const rawStatus = i.status || i.STATUS || i.situação || i.SITUACAO || 'AGUARD. INSTALACAO';
         const statusText = rawStatus.toString().trim().toUpperCase();
         const badgeClass = getStatusBadgeClass(statusText);
-
+        //explicação: A função getStatusBadgeClass retorna a classe CSS apropriada para o 
+        // status, garantindo que cada status tenha uma cor e estilo consistentes.
         const dataCadastro = i.timestamp ? new Date(i.timestamp).toLocaleString('pt-BR') : 'Data N/I';
         const valorFormatado = (Number(i.valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
+        //explicação: A variável valorFormatado formata o valor da venda para o padrão monetário
+        //brasileiro, garantindo que seja exibido corretamente no card.
+        //o valor é puxado da planilha, mas precisa ser verificado se está correto, pois pode 
+        //pegar o primeiro valor de forma incorreta.
+        //ela está sendo pega na função parseRow, que faz o parse da planilha e retorna um 
+        // objeto com os dados limpos.
         container.innerHTML += `
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 space-y-2">
                 <div class="flex justify-between items-start gap-2">
                     <div>
                         <h4 class="font-black text-sm text-slate-900 leading-tight">${i.cliente || 'Cliente não informado'}</h4>
                         <p class="text-[10px] font-bold text-slate-400 mt-0.5">
-                            SOLAR: <span class="text-slate-700 font-black">${i.numSolar || '-'}</span> 
+                            
                             ${i.cpf ? `• CPF: <span class="text-slate-700">${i.cpf}</span>` : ''}
                         </p>
+                        <p class="text-[10px] font-bold text-slate-400 mt-0.5">
+                  
+                    ${i.contratoSolar ? `• CONTRATO: <span class="text-slate-700 font-black">${i.contratoSolar}</span>` : ''}
+                    
+                </p>
                     </div>
+
+
+
+
+                    
 
                     <!-- Badges no topo direito do card -->
                     <div class="flex items-center gap-1.5 flex-wrap justify-end shrink-0">
@@ -232,11 +246,15 @@ function renderVendasList() {
 
                 <div class="flex items-center justify-between text-[11px] font-semibold bg-slate-50 p-2 rounded-xl text-slate-600">
                     <span>Vend: <strong class="text-slate-800">${i.vendedor || 'N/A'}</strong> (Líder: ${i.lider || 'N/A'})</span>
-                    <span class="font-black text-slate-900">${valorFormatado}</span>
+                   
+                   
                 </div>
             </div>
         `;
     });
+    // <span class="font-black text-slate-900">${valorFormatado}</span>
+    //add o span para ter o valor do produto. mas tem que ver se está certo na planilha
+    //pq ele pegar o primeiro valor
 
     if (window.lucide) lucide.createIcons();
 }
