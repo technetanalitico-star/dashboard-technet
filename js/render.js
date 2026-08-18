@@ -100,10 +100,10 @@ function renderAll() {
     const sellerCounts = {};
 
     data.forEach(i => {
-        if (i.virtua) virtua++;
-        if (i.chip) movel++;
-        if (i.tv) tv++;
-        if (i.fone) fone++;
+        if (i.virtua && i.virtua !== 'NÃO POSSUI' && i.virtua !== 'N/A' && i.virtua !== '0') virtua++;
+        if (i.chip && i.chip !== 'NÃO POSSUI' && i.chip !== 'N/A' && i.chip !== '0') movel++;
+        if (i.tv && i.tv !== 'NÃO POSSUI' && i.tv !== 'N/A' && i.tv !== '0') tv++;
+        if (i.fone && i.fone !== 'NÃO POSSUI' && i.fone !== 'N/A' && i.fone !== '0') fone++;
         
         const valorSolar = String(i.solar || '').trim().toUpperCase();
         if (valorSolar === 'SIM' || valorSolar === 'S' || i.solar === true) {
@@ -128,6 +128,11 @@ function renderAll() {
     if (document.getElementById('valReceita')) {
         document.getElementById('valReceita').textContent = receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
+
+    // =========================================================
+    // >>> ADICIONE APENAS ESTA LINHA AQUI DAQUI EM DIANTE <<<
+    // =========================================================
+    renderStatusCards(data); 
 
     if (typeof renderMetas === 'function') renderMetas();
     if (typeof renderRanking === 'function') renderRanking(sellerCounts, data.length);
@@ -185,11 +190,17 @@ function renderVendasList() {
     }
 
     filtered.forEach(i => {
+        // 1. Monta apenas os PRODUTOS (sem o status misturado aqui)
         let prods = [];
-        if (i.virtua) prods.push('VIRTUA');
-        if (i.tv) prods.push('TV');
-        if (i.chip) prods.push('MÓVEL');
-        if (i.fone) prods.push('FONE');
+        if (i.virtua && i.virtua !== "NÃO POSSUI" && i.virtua !== "N/A" && i.virtua !== "0") prods.push('VIRTUA');
+        if (i.tv && i.tv !== "NÃO POSSUI" && i.tv !== "N/A" && i.tv !== "0") prods.push('TV');
+        if (i.chip && i.chip !== "NÃO POSSUI" && i.chip !== "N/A" && i.chip !== "0") prods.push('MÓVEL');
+        if (i.fone && i.fone !== "NÃO POSSUI" && i.fone !== "N/A" && i.fone !== "0") prods.push('FONE');
+
+        // 2. Trata o STATUS separadamente para a Badge
+        const rawStatus = i.status || i.STATUS || i.situação || i.SITUACAO || 'AGUARD. INSTALACAO';
+        const statusText = rawStatus.toString().trim().toUpperCase();
+        const badgeClass = getStatusBadgeClass(statusText);
 
         const dataCadastro = i.timestamp ? new Date(i.timestamp).toLocaleString('pt-BR') : 'Data N/I';
         const valorFormatado = (Number(i.valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -204,7 +215,15 @@ function renderVendasList() {
                             ${i.cpf ? `• CPF: <span class="text-slate-700">${i.cpf}</span>` : ''}
                         </p>
                     </div>
-                    <span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-1 rounded-lg shrink-0">${prods.join(' + ') || 'VENDA'}</span>
+
+                    <!-- Badges no topo direito do card -->
+                    <div class="flex items-center gap-1.5 flex-wrap justify-end shrink-0">
+                        <!-- Tag do Produto -->
+                        <span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-1 rounded-lg">${prods.join(' + ') || 'VENDA'}</span>
+                        
+                        <!-- Badge do Status separado -->
+                        ${statusText ? `<span class="${badgeClass} text-[9px] font-black px-2 py-1 rounded-lg">${statusText}</span>` : ''}
+                    </div>
                 </div>
 
                 <p class="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
@@ -338,4 +357,14 @@ function switchTab(tab) {
 function logout() {
     sessionStorage.clear();
     window.location.href = 'index.html';
+}
+
+// Função/Trecho para formatar as cores da badge conforme o status
+function getStatusBadgeClass(status) {
+    const st = (status || '').toString().trim().toUpperCase();
+    if (st === 'CONCLUIDAS') return 'bg-emerald-100 text-emerald-700';
+    if (st === 'COM PENDENCIA') return 'bg-amber-100 text-amber-700';
+    if (st === 'AGUARD. INSTALACAO') return 'bg-blue-100 text-blue-700';
+    if (st === 'CANCELADAS') return 'bg-red-100 text-red-700';
+    return 'bg-slate-100 text-slate-700'; // Padrão para outros status
 }

@@ -43,7 +43,8 @@ function parseRow(row) {
         virtua: cleanRow['VIRTUA'] || '',
         fone: cleanRow['FONE'] || '',
         chip: cleanRow['CHIP'] || '',
-        valor: valorNum
+        valor: valorNum,
+        status: row.STATUS || row.status || row['SITUAÇÃO'] || row['SITUACAO'] || ''
     };
 }
 
