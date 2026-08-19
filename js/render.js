@@ -32,7 +32,7 @@ function initPage(requiredProfile, options = { showBranches: true }) {
         // 2. Preenche os dados do usuário
         const usrEl = document.getElementById('usrName');
         if (usrEl) usrEl.textContent = session.user.username;
-        
+
         // 3. Mapeia e renderiza diretamente com o filtro aplicado
         rawSales = (session.sales || []).map(parseRow);
         renderAll();
@@ -55,7 +55,7 @@ function getFilteredData() {
         if (perfil === 'VENDEDOR') {
             const vendedorVenda = String(i.vendedor || '').trim().toUpperCase();
             if (vendedorVenda !== usuarioLogado) return false;
-        } 
+        }
         // 2. Garante que SUPERVISOR só veja vendas da sua equipe exata
         else if (perfil === 'SUPERVISOR') {
             const supervisorVenda = String(i.lider || '').trim().toUpperCase();
@@ -78,7 +78,7 @@ function renderAll() {
         if (i.chip && i.chip !== 'NÃO POSSUI' && i.chip !== 'N/A' && i.chip !== '0') movel++;
         if (i.tv && i.tv !== 'NÃO POSSUI' && i.tv !== 'N/A' && i.tv !== '0') tv++;
         if (i.fone && i.fone !== 'NÃO POSSUI' && i.fone !== 'N/A' && i.fone !== '0') fone++;
-        
+
         const valorSolar = String(i.solar || '').trim().toUpperCase();
         if (valorSolar === 'SIM' || valorSolar === 'S' || i.solar === true) {
             solar++;
@@ -103,8 +103,8 @@ function renderAll() {
         document.getElementById('valReceita').textContent = receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
- 
-    renderStatusCards(data); 
+
+    renderStatusCards(data);
 
     if (typeof renderMetas === 'function') renderMetas();
     if (typeof renderRanking === 'function') renderRanking(sellerCounts, data.length);
@@ -194,25 +194,26 @@ function renderVendasList() {
                         </p>
                         <p class="text-[10px] font-bold text-slate-400 mt-0.5">
                   
-                    ${i.contratoSolar ? `• CONTRATO: <span class="text-slate-700 font-black">${i.contratoSolar}</span>` : ''}
-                    
-                </p>
-                    </div>
-
-
-
-
-                    
-
-                    <!-- Badges no topo direito do card -->
-                    <div class="flex items-center gap-1.5 flex-wrap justify-end shrink-0">
-                        <!-- Tag do Produto -->
-                        <span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-1 rounded-lg">${prods.join(' + ') || 'VENDA'}</span>
+                        ${i.contratoSolar ? `• CONTRATO: <span class="text-slate-700 font-black">${i.contratoSolar}</span>` : ''}
                         
-                        <!-- Badge do Status separado -->
-                        ${statusText ? `<span class="${badgeClass} text-[9px] font-black px-2 py-1 rounded-lg">${statusText}</span>` : ''}
+                        </p>
                     </div>
+   
+
+                    ${statusText ? `
+                        <div class="flex flex-col items-end gap-1 shrink-0">
+                            <span class="${badgeClass} text-[9px] font-black px-2 py-1 rounded-lg">
+                                ${statusText}
+                            </span>
+                            <span class="bg-red-50 text-red-600 text-[9px] font-black px-2 py-1 rounded-lg">
+                                ${prods.join(' + ') || 'VENDA'}
+                            </span>
+                        </div>
+                    ` : ''}
+                            
+                    
                 </div>
+                
 
                 <p class="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
                     <i data-lucide="calendar" class="w-3 h-3"></i> Cadastrado em: <strong class="text-slate-600">${dataCadastro}</strong>
@@ -234,7 +235,7 @@ function renderVendasList() {
 }
 
 function renderMetas() {
-    const data = getFilteredData(); 
+    const data = getFilteredData();
     const hoje = new Date();
     const diaHoje = hoje.getDate();
     const mesHoje = hoje.getMonth();
