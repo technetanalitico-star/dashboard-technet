@@ -50,8 +50,23 @@ function parseRow(row) {
 }
 
 function getFilteredData() {
-    return rawData.filter(i => {
+    const usuarioLogado = String(session?.user?.username || '').trim().toUpperCase();
+    const perfil = session?.user?.perfil;
+
+    return rawSales.filter(i => {
+        // 1. Garante que VENDEDOR só veja vendas com o seu nome EXATO
+        if (perfil === 'VENDEDOR') {
+            const vendedorVenda = String(i.vendedor || '').trim().toUpperCase();
+            if (vendedorVenda !== usuarioLogado) return false;
+        } 
+        // 2. Garante que SUPERVISOR só veja vendas da sua equipe exata
+        else if (perfil === 'SUPERVISOR') {
+            const supervisorVenda = String(i.lider || '').trim().toUpperCase();
+            if (supervisorVenda !== usuarioLogado) return false;
+        }
+
+        // 3. Filtro por Filial (TODOS / VNA / RDT)
         if (currentBranch === 'TODOS') return true;
-        return i.empresa.includes(currentBranch);
+        return String(i.empresa || '').toUpperCase().includes(currentBranch);
     });
 }
