@@ -2,56 +2,7 @@ let session = JSON.parse(sessionStorage.getItem('userData'));
 let currentBranch = 'TODOS';
 let rawSales = [];
 
-function renderStatusCards(vendasData) {
-  const container = document.getElementById('status-cards-container');
-  if (!container || !Array.isArray(vendasData)) return;
 
-  // 1. Agrupamento e contagem dinâmica dos valores da coluna STATUS
-  const statusCounts = {};
-
-  vendasData.forEach(row => {
-    const statusRaw = row.STATUS || row.status;
-    if (!statusRaw) return;
-
-    const statusName = statusRaw.toString().trim().toUpperCase();
-    statusCounts[statusName] = (statusCounts[statusName] || 0) + 1;
-  });
-
-  // 2. Mapeamento visual para status conhecidos (cores e ícones)
-  const themeMap = {
-    'COM PENDENCIA': { color: '#f59e0b', icon: '⚠️', sub: 'Aguardando tratativa' },
-    'AGUARD. INSTALACAO': { color: '#3b82f6', icon: '🔧', sub: 'Fila operacional' },
-    'CONCLUIDAS': { color: '#10b981', icon: '✓', sub: 'Vendas concluídas' },
-    'CANCELADAS': { color: '#ef4444', icon: '✕', sub: 'Vendas perdidas' }
-  };
-
-  // Paleta fallback para atribuir cores automaticamente a novos status
-  const defaultColors = ['#8b5cf6', '#ec4899', '#06b6d4', '#64748b'];
-  let colorIndex = 0;
-
-  // 3. Geração dinâmica dos Cards
-  container.innerHTML = Object.entries(statusCounts).map(([status, count]) => {
-    const theme = themeMap[status] || {
-      color: defaultColors[colorIndex++ % defaultColors.length],
-      icon: '📊',
-      sub: status.toLowerCase()
-    };
-
-    return `
-      <div class="status-card" style="border-left-color: ${theme.color};">
-        <div class="status-card-header">
-          <div class="status-icon-badge" style="background-color: ${theme.color}20; color: ${theme.color};">
-            ${theme.icon}
-          </div>
-          <span class="status-title">${status}</span>
-        </div>
-        <div class="status-count">${count}</div>
-        <div class="status-divider"></div>
-        <div class="status-subtext">${theme.sub}</div>
-      </div>
-    `;
-  }).join('');
-}
 
 
 
@@ -72,19 +23,27 @@ function initPage(requiredProfile, options = { showBranches: true }) {
         return;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    const start = () => {
         // 1. Injeta o HTML compartilhado (Header, Filtros, Tabs)
         if (typeof renderSharedComponents === 'function') {
             renderSharedComponents(options);
         }
 
-        // 2. Preenche os dados do usuário e carrega as vendas
+        // 2. Preenche os dados do usuário
         const usrEl = document.getElementById('usrName');
         if (usrEl) usrEl.textContent = session.user.username;
         
+        // 3. Mapeia e renderiza diretamente com o filtro aplicado
         rawSales = (session.sales || []).map(parseRow);
         renderAll();
-    });
+    };
+
+    // Executa imediatamente se o DOM já carregou, ou aguarda o carregamento
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
 }
 
 function getFilteredData() {
@@ -261,7 +220,7 @@ function renderVendasList() {
 
                 <div class="flex items-center justify-between text-[11px] font-semibold bg-slate-50 p-2 rounded-xl text-slate-600">
                     <span>Vend: <strong class="text-slate-800">${i.vendedor || 'N/A'}</strong> (Líder: ${i.lider || 'N/A'})</span>
-                   
+                    <span class="font-black text-slate-900">${valorFormatado}</span>
                    
                 </div>
             </div>
